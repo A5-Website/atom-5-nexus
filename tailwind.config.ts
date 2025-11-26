@@ -73,8 +73,8 @@ export default {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "glow": {
-          "0%, 100%": { boxShadow: "0 0 20px hsl(189 95% 52% / 0.3)" },
-          "50%": { boxShadow: "0 0 40px hsl(189 95% 52% / 0.6)" },
+          "0%, 100%": { boxShadow: "0 0 20px hsl(0 0% 100% / 0.3)" },
+          "50%": { boxShadow: "0 0 40px hsl(0 0% 100% / 0.6)" },
         },
         "accordion-down": {
           from: {

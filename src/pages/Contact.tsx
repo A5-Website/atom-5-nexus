@@ -94,10 +94,6 @@ const Contact = () => {
                 {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </form>
-            
-            <p className="text-sm text-muted-foreground mt-6 text-center">
-              Messages will be sent to info@atom5engineering.com
-            </p>
           </div>
         </div>
       </main>
