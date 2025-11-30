@@ -477,7 +477,7 @@ function NeuralNetwork3D() {
 // CSS-based fallback for when WebGL is unavailable
 function CSSNetworkFallback() {
   const nodes = useMemo(() => {
-    return Array.from({ length: 50 }, () => ({
+    return Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 5,
@@ -486,31 +486,31 @@ function CSSNetworkFallback() {
   }, []);
 
   return (
-    <div className="w-full h-full bg-black relative overflow-hidden">
+    <div className="w-full h-full bg-background relative overflow-hidden">
       <svg className="absolute inset-0 w-full h-full">
         {nodes.map((node, i) => (
           <g key={i}>
             <circle
               cx={`${node.x}%`}
               cy={`${node.y}%`}
-              r="2"
+              r="4"
               fill="white"
-              opacity="0.2"
+              opacity="0.4"
               className="animate-pulse"
               style={{
                 animationDelay: `${node.delay}s`,
                 animationDuration: `${node.duration}s`
               }}
             />
-            {i > 0 && i % 3 === 0 && (
+            {i > 0 && i % 2 === 0 && (
               <line
                 x1={`${nodes[i - 1].x}%`}
                 y1={`${nodes[i - 1].y}%`}
                 x2={`${node.x}%`}
                 y2={`${node.y}%`}
                 stroke="white"
-                strokeWidth="0.5"
-                opacity="0.1"
+                strokeWidth="1"
+                opacity="0.25"
               />
             )}
           </g>
