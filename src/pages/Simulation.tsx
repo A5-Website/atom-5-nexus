@@ -12,10 +12,8 @@ const Simulation = () => {
       {!isFullscreen && <Navigation />}
       
       <div 
-        className={`${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen'} bg-cover bg-center bg-no-repeat relative`}
-        style={{ backgroundImage: `url(${heroBackground})` }}
+        className={`${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen'} bg-black relative`}
       >
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-md" />
         
         <main className={`relative z-10 ${isFullscreen ? 'h-screen' : 'pt-32 pb-16 px-8'}`}>
           <div className={`${isFullscreen ? 'h-full' : 'max-w-6xl mx-auto'} animate-fade-in`}>
