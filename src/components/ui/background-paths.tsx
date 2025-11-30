@@ -436,8 +436,8 @@ export function BackgroundPaths({
   const words = title.split(" ");
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
-      <div className="absolute inset-0">
+    <div className="relative min-h-screen w-full flex items-center justify-between overflow-hidden bg-background">
+      <div className="absolute inset-0 left-1/4">
         <Canvas
           camera={{ position: [0, 0, 60], fov: 60 }}
           style={{ background: 'transparent' }}
@@ -454,12 +454,12 @@ export function BackgroundPaths({
         </Canvas>
       </div>
 
-      <div className="relative z-10 px-8 pointer-events-none">
+      <div className="relative z-10 pl-16 pr-8 pointer-events-none max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 2, ease: "easeOut" }}
-          className="max-w-2xl text-center"
+          className="text-left"
         >
           <h1 className="text-3xl md:text-4xl font-display text-foreground leading-tight">
             {words.map((word, wordIndex) => (
