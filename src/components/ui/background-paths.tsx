@@ -84,7 +84,7 @@ function FlowingGlow({
     lineRef.current.geometry.attributes.color.needsUpdate = true;
     
     // Overall fade based on lifecycle
-    const opacity = Math.sin(t * Math.PI) * 0.4;
+    const opacity = Math.sin(t * Math.PI) * 0.8; // Increased from 0.4 to 0.8
     if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
       lineRef.current.material.opacity = opacity;
     }
@@ -97,9 +97,9 @@ function FlowingGlow({
         start[2] + (end[2] - start[2]) * t
       );
       
-      // Sparkle fades with the glow
+      // Sparkle fades with the glow - more visible
       if (sparkleRef.current.material instanceof THREE.MeshBasicMaterial) {
-        sparkleRef.current.material.opacity = Math.sin(t * Math.PI) * 1.0;
+        sparkleRef.current.material.opacity = Math.sin(t * Math.PI) * 2.0; // Increased from 1.0 to 2.0
       }
     }
   });
@@ -306,58 +306,70 @@ function NeuralNetwork3D() {
         
         const curve = new THREE.CatmullRomCurve3([start, midPoint, end]);
         
-        // Create tube geometry with custom radius function
-        const tubeSegments = 20;
-        const tubeGeometry = new THREE.TubeGeometry(
-          curve,
-          tubeSegments,
-          0.005, // Ultra thin base radius
-          3,
-          false
-        );
+        // Create tube geometry with varying radius
+        const tubeSegments = 30;
+        const radialSegments = 8; // More segments for smooth cylinder
         
-        // Modify vertex positions and add colors for fade effect
-        const positions = tubeGeometry.attributes.position;
-        const colors = new Float32Array(positions.count * 3);
+        // Custom tube with variable radius
+        const path = curve;
+        const frames = path.computeFrenetFrames(tubeSegments, false);
+        const vertices: number[] = [];
+        const colors: number[] = [];
+        const indices: number[] = [];
         
-        for (let j = 0; j <= tubeSegments; j++) {
-          const t = j / tubeSegments;
-          // Fade from ends (nodes) to middle - use parabolic curve
-          const fadeFromEnds = 1 - Math.pow(2 * t - 1, 2); // Peak at 0.5, 0 at ends
-          const alpha = 0.3 + fadeFromEnds * 0.7; // Range from 0.3 to 1.0
+        for (let i = 0; i <= tubeSegments; i++) {
+          const t = i / tubeSegments;
+          const point = path.getPointAt(t);
+          const normal = frames.normals[i];
+          const binormal = frames.binormals[i];
           
-          // Vary radius - thicker near nodes, thinner in middle
-          const radiusMultiplier = 1 + (1 - fadeFromEnds) * 1.5; // 1x in middle, up to 2.5x at ends
+          // Variable radius: thick at ends (nodes), thin in middle
+          const distFromCenter = Math.abs(t - 0.5) * 2; // 0 at center, 1 at ends
+          const baseRadius = 0.008;
+          const endRadius = 0.025;
+          const radius = baseRadius + (endRadius - baseRadius) * distFromCenter;
           
-          // Apply to all vertices in this ring
-          for (let k = 0; k < 3; k++) {
-            const idx = j * 3 + k;
-            const vertIdx = idx * 3;
+          // Variable opacity: fade from ends to middle
+          const fadeFromEnds = 1 - Math.pow(2 * t - 1, 2); // Peak at 0.5
+          const alpha = 0.2 + fadeFromEnds * 0.6; // Range from 0.2 to 0.8
+          
+          for (let j = 0; j < radialSegments; j++) {
+            const angle = (j / radialSegments) * Math.PI * 2;
+            const dx = Math.cos(angle) * radius;
+            const dy = Math.sin(angle) * radius;
             
-            // Get position relative to curve center
-            const centerPoint = curve.getPointAt(t);
-            const dx = positions.array[vertIdx] - centerPoint.x;
-            const dy = positions.array[vertIdx + 1] - centerPoint.y;
-            const dz = positions.array[vertIdx + 2] - centerPoint.z;
+            const vertex = new THREE.Vector3();
+            vertex.x = point.x + dx * normal.x + dy * binormal.x;
+            vertex.y = point.y + dx * normal.y + dy * binormal.y;
+            vertex.z = point.z + dx * normal.z + dy * binormal.z;
             
-            // Scale radially
-            positions.array[vertIdx] = centerPoint.x + dx * radiusMultiplier;
-            positions.array[vertIdx + 1] = centerPoint.y + dy * radiusMultiplier;
-            positions.array[vertIdx + 2] = centerPoint.z + dz * radiusMultiplier;
-            
-            // Set color (white with varying alpha)
-            colors[vertIdx] = alpha;
-            colors[vertIdx + 1] = alpha;
-            colors[vertIdx + 2] = alpha;
+            vertices.push(vertex.x, vertex.y, vertex.z);
+            colors.push(alpha, alpha, alpha);
           }
         }
         
-        tubeGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        positions.needsUpdate = true;
+        // Create indices for the tube faces
+        for (let i = 0; i < tubeSegments; i++) {
+          for (let j = 0; j < radialSegments; j++) {
+            const a = i * radialSegments + j;
+            const b = i * radialSegments + ((j + 1) % radialSegments);
+            const c = (i + 1) * radialSegments + ((j + 1) % radialSegments);
+            const d = (i + 1) * radialSegments + j;
+            
+            indices.push(a, b, d);
+            indices.push(b, c, d);
+          }
+        }
+        
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
         
         meshes.push({
-          geometry: tubeGeometry,
-          opacity: 0.08 + Math.random() * 0.1, // Dimmer: 0.08 to 0.18
+          geometry: geometry as any,
+          opacity: 0.12 + Math.random() * 0.08, // 0.12 to 0.2
           key: `${i}-${connIndex}`,
         });
       });
