@@ -21,61 +21,77 @@ interface ActiveFlow {
 function FlowingGlow({ 
   start, 
   end, 
-  startTime,
-  currentTime 
+  startTime
 }: { 
   start: [number, number, number]; 
   end: [number, number, number]; 
   startTime: number;
-  currentTime: number;
 }) {
   const lineRef = useRef<THREE.Line>(null);
   
-  const elapsedTime = currentTime - startTime;
-  const duration = 3; // Slower duration
-  const t = Math.min(elapsedTime / duration, 1);
+  useFrame((state) => {
+    if (!lineRef.current) return;
+    
+    const elapsedTime = state.clock.elapsedTime - startTime;
+    const duration = 3; // Slower duration
+    const t = Math.min(elapsedTime / duration, 1);
+    
+    if (t >= 1) {
+      // Hide the line when animation is complete
+      lineRef.current.visible = false;
+      return;
+    }
+    
+    lineRef.current.visible = true;
+    
+    // Calculate segment length (smaller segment)
+    const segmentLength = 0.05;
+    const startT = Math.max(0, t - segmentLength / 2);
+    const endT = Math.min(1, t + segmentLength / 2);
+    
+    // Interpolate positions
+    const startPos = new THREE.Vector3(
+      start[0] + (end[0] - start[0]) * startT,
+      start[1] + (end[1] - start[1]) * startT,
+      start[2] + (end[2] - start[2]) * startT
+    );
+    
+    const endPos = new THREE.Vector3(
+      start[0] + (end[0] - start[0]) * endT,
+      start[1] + (end[1] - start[1]) * endT,
+      start[2] + (end[2] - start[2]) * endT
+    );
+    
+    const positions = new Float32Array([
+      startPos.x, startPos.y, startPos.z,
+      endPos.x, endPos.y, endPos.z
+    ]);
+    
+    lineRef.current.geometry.setAttribute(
+      'position',
+      new THREE.BufferAttribute(positions, 3)
+    );
+    lineRef.current.geometry.attributes.position.needsUpdate = true;
+    
+    // Fade out as it approaches end
+    const opacity = Math.sin(t * Math.PI) * 0.9;
+    if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
+      lineRef.current.material.opacity = opacity;
+    }
+  });
   
-  if (t >= 1 || !lineRef.current) return null;
+  const geometry = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array([...start, ...end]);
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    return geom;
+  }, [start, end]);
   
-  // Calculate segment length (smaller segment)
-  const segmentLength = 0.05;
-  const startT = Math.max(0, t - segmentLength / 2);
-  const endT = Math.min(1, t + segmentLength / 2);
+  const material = useMemo(() => {
+    return new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
+  }, []);
   
-  // Interpolate positions
-  const startPos = [
-    start[0] + (end[0] - start[0]) * startT,
-    start[1] + (end[1] - start[1]) * startT,
-    start[2] + (end[2] - start[2]) * startT,
-  ];
-  
-  const endPos = [
-    start[0] + (end[0] - start[0]) * endT,
-    start[1] + (end[1] - start[1]) * endT,
-    start[2] + (end[2] - start[2]) * endT,
-  ];
-  
-  const positions = new Float32Array([...startPos, ...endPos]);
-  lineRef.current.geometry.setAttribute(
-    'position',
-    new THREE.BufferAttribute(positions, 3)
-  );
-  
-  // Fade out as it approaches end
-  const opacity = Math.sin(t * Math.PI) * 0.9;
-  if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
-    lineRef.current.material.opacity = opacity;
-  }
-  
-  return (
-    <primitive object={new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(...start),
-        new THREE.Vector3(...end)
-      ]),
-      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 })
-    )} ref={lineRef} />
-  );
+  return <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />;
 }
 
 function NeuralNetwork3D() {
@@ -132,6 +148,7 @@ function NeuralNetwork3D() {
   });
   
   const handleNodeClick = useCallback((nodeIndex: number) => {
+    console.log('Node clicked:', nodeIndex);
     const newFlows: ActiveFlow[] = [];
     const visited = new Set<number>();
     const queue: Array<{ index: number; generation: number }> = [{ index: nodeIndex, generation: 0 }];
@@ -163,6 +180,7 @@ function NeuralNetwork3D() {
       }
     }
     
+    console.log('Created flows:', newFlows.length);
     setActiveFlows(prev => [...prev, ...newFlows]);
     
     // Clean up old flows after duration
@@ -234,7 +252,6 @@ function NeuralNetwork3D() {
           start={nodes[flow.startIndex].position}
           end={nodes[flow.endIndex].position}
           startTime={flow.startTime}
-          currentTime={currentTime}
         />
       ))}
     </>
