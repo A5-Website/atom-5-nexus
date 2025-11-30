@@ -193,7 +193,7 @@ function NeuralNetwork3D() {
           (Math.random() - 0.5) * 14,
         ],
         connections: [],
-        size: 0.25 + Math.random() * 0.35, // Bigger random sizes between 0.25 and 0.6
+        size: 0.35 + Math.random() * 0.45, // Bigger random sizes between 0.35 and 0.8
       });
     }
     
@@ -229,16 +229,6 @@ function NeuralNetwork3D() {
   useFrame((state) => {
     setCurrentTime(state.clock.elapsedTime);
   });
-  
-  // Auto-activate random nodes every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const randomIndex = Math.floor(Math.random() * nodes.length);
-      handleNodeClick(randomIndex);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [nodes.length, currentTime]);
   
   const handleNodeClick = useCallback((nodeIndex: number) => {
     console.log('Node clicked:', nodeIndex);
@@ -281,6 +271,16 @@ function NeuralNetwork3D() {
       setActiveFlows(prev => prev.filter(flow => !newFlows.includes(flow)));
     }, 4000);
   }, [nodes, currentTime]);
+  
+  // Auto-activate random nodes every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * nodes.length);
+      handleNodeClick(randomIndex);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [nodes.length, handleNodeClick]);
   
   const connections = useMemo(() => {
     const meshes: Array<{
@@ -394,7 +394,7 @@ function NeuralNetwork3D() {
           <spriteMaterial 
             map={nodeTexture}
             transparent
-            opacity={0.7 + Math.random() * 0.3}
+            opacity={0.85}
             depthWrite={false}
           />
         </sprite>
