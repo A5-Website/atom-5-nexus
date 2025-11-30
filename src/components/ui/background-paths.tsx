@@ -474,6 +474,52 @@ function NeuralNetwork3D() {
   );
 }
 
+// CSS-based fallback for when WebGL is unavailable
+function CSSNetworkFallback() {
+  const nodes = useMemo(() => {
+    return Array.from({ length: 50 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: 3 + Math.random() * 4
+    }));
+  }, []);
+
+  return (
+    <div className="w-full h-full bg-black relative overflow-hidden">
+      <svg className="absolute inset-0 w-full h-full">
+        {nodes.map((node, i) => (
+          <g key={i}>
+            <circle
+              cx={`${node.x}%`}
+              cy={`${node.y}%`}
+              r="2"
+              fill="white"
+              opacity="0.2"
+              className="animate-pulse"
+              style={{
+                animationDelay: `${node.delay}s`,
+                animationDuration: `${node.duration}s`
+              }}
+            />
+            {i > 0 && i % 3 === 0 && (
+              <line
+                x1={`${nodes[i - 1].x}%`}
+                y1={`${nodes[i - 1].y}%`}
+                x2={`${node.x}%`}
+                y2={`${node.y}%`}
+                stroke="white"
+                strokeWidth="0.5"
+                opacity="0.1"
+              />
+            )}
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 export function BackgroundPaths({
   title = "Background Paths",
 }: {
@@ -484,15 +530,7 @@ export function BackgroundPaths({
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
-        <CanvasErrorBoundary
-          fallback={
-            <div className="w-full h-full bg-background">
-              <div className="absolute top-4 left-4 text-muted-foreground text-xs">
-                WebGL unavailable - displaying fallback
-              </div>
-            </div>
-          }
-        >
+        <CanvasErrorBoundary fallback={<CSSNetworkFallback />}>
           <Canvas
             camera={{ position: [18, 18, 18], fov: 60 }}
             style={{ background: 'transparent' }}
