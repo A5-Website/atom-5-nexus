@@ -144,7 +144,7 @@ function NeuralNetwork3D() {
     
     const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.3)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
     
     ctx.fillStyle = gradient;
@@ -409,12 +409,12 @@ function NeuralNetwork3D() {
               handleNodeClick(i);
             }}
           >
-            <spriteMaterial 
-              map={nodeTexture}
-              transparent
-              opacity={0.25}
-              depthWrite={false}
-            />
+          <spriteMaterial 
+            map={nodeTexture}
+            transparent
+            opacity={0.15}
+            depthWrite={false}
+          />
           </sprite>
         );
       })}
