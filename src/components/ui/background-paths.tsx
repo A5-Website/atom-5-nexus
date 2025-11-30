@@ -81,7 +81,7 @@ function FlowingGlow({
     lineRef.current.geometry.attributes.color.needsUpdate = true;
     
     // Overall fade based on lifecycle
-    const opacity = Math.sin(t * Math.PI) * 0.8; // Increased from 0.4 to 0.8
+    const opacity = Math.sin(t * Math.PI) * 0.4; // Dimmer glow
     if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
       lineRef.current.material.opacity = opacity;
     }
@@ -351,7 +351,7 @@ function NeuralNetwork3D() {
         
         meshes.push({
           geometry: geometry as any,
-          opacity: 0.12 + Math.random() * 0.08, // 0.12 to 0.2
+          opacity: 0.06 + Math.random() * 0.04, // 0.06 to 0.1 - dimmer
           key: `${i}-${connIndex}`,
         });
       });
@@ -376,7 +376,7 @@ function NeuralNetwork3D() {
           <spriteMaterial 
             map={nodeTexture}
             transparent
-            opacity={0.55}
+            opacity={0.25}
             depthWrite={false}
           />
         </sprite>
@@ -421,8 +421,8 @@ export function BackgroundPaths({
           camera={{ position: [26, 26, 26], fov: 60 }}
           style={{ background: 'transparent' }}
         >
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <ambientLight intensity={0.2} />
+          <pointLight position={[10, 10, 10]} intensity={0.3} />
           <NeuralNetwork3D />
           <OrbitControls 
             enableDamping
