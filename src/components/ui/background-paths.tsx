@@ -269,7 +269,7 @@ function NeuralNetwork3D() {
           start: node.position,
           end: nodes[connIndex].position,
           curve,
-          opacity: 0.05 + Math.random() * 0.1, // More faded: 0.05 to 0.15
+          opacity: 0.15 + Math.random() * 0.15, // Increased visibility: 0.15 to 0.3
           key: `${i}-${connIndex}`,
         });
       });
@@ -302,7 +302,7 @@ function NeuralNetwork3D() {
       
       {/* Connection lines - curved with random fading */}
       {connections.map((conn) => {
-        const points = conn.curve.getPoints(20); // Get 20 points along the curve
+        const points = conn.curve.getPoints(20);
         const positions = new Float32Array(points.length * 3);
         points.forEach((point, i) => {
           positions[i * 3] = point.x;
@@ -320,7 +320,12 @@ function NeuralNetwork3D() {
                 itemSize={3}
               />
             </bufferGeometry>
-            <lineBasicMaterial color="#ffffff" opacity={conn.opacity} transparent />
+            <lineBasicMaterial 
+              color="#ffffff" 
+              opacity={conn.opacity} 
+              transparent 
+              linewidth={3}
+            />
           </line>
         );
       })}
@@ -349,7 +354,7 @@ export function BackgroundPaths({
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
         <Canvas
-          camera={{ position: [0, 0, 30], fov: 60 }}
+          camera={{ position: [0, 0, 50], fov: 60 }}
           style={{ background: 'transparent' }}
         >
           <ambientLight intensity={0.5} />
