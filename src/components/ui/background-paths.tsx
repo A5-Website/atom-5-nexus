@@ -94,15 +94,39 @@ function FlowingGlow({
   return <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />;
 }
 
+interface NodeDataExtended extends NodeData {
+  size: number;
+}
+
 function NeuralNetwork3D() {
   const [activeFlows, setActiveFlows] = useState<ActiveFlow[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   
-  const nodes: NodeData[] = useMemo(() => {
-    const nodeList: NodeData[] = [];
+  // Create texture for soft-edged nodes
+  const nodeTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d')!;
+    
+    const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 64, 64);
+    
+    const texture = new THREE.Texture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+  
+  const nodes: NodeDataExtended[] = useMemo(() => {
+    const nodeList: NodeDataExtended[] = [];
     const numNodes = 200;
     
-    // Generate random node positions in 3D space (larger space)
+    // Generate random node positions in 3D space with size variations
     for (let i = 0; i < numNodes; i++) {
       nodeList.push({
         position: [
@@ -111,6 +135,7 @@ function NeuralNetwork3D() {
           (Math.random() - 0.5) * 25,
         ],
         connections: [],
+        size: 0.15 + Math.random() * 0.25, // Random sizes between 0.15 and 0.4
       });
     }
     
@@ -193,14 +218,33 @@ function NeuralNetwork3D() {
     const lines: Array<{
       start: [number, number, number];
       end: [number, number, number];
+      curve: THREE.CatmullRomCurve3;
+      opacity: number;
       key: string;
     }> = [];
     
     nodes.forEach((node, i) => {
       node.connections.forEach((connIndex) => {
+        const start = new THREE.Vector3(...node.position);
+        const end = new THREE.Vector3(...nodes[connIndex].position);
+        
+        // Create a curved path instead of straight line
+        const midPoint = new THREE.Vector3()
+          .addVectors(start, end)
+          .multiplyScalar(0.5);
+        
+        // Add random offset to midpoint for curve
+        midPoint.x += (Math.random() - 0.5) * 2;
+        midPoint.y += (Math.random() - 0.5) * 2;
+        midPoint.z += (Math.random() - 0.5) * 2;
+        
+        const curve = new THREE.CatmullRomCurve3([start, midPoint, end]);
+        
         lines.push({
           start: node.position,
           end: nodes[connIndex].position,
+          curve,
+          opacity: 0.1 + Math.random() * 0.2, // Random opacity between 0.1 and 0.3
           key: `${i}-${connIndex}`,
         });
       });
@@ -211,39 +255,50 @@ function NeuralNetwork3D() {
   
   return (
     <>
-      {/* Node spheres - clickable */}
+      {/* Node sprites with soft edges - clickable */}
       {nodes.map((node, i) => (
-        <mesh 
+        <sprite 
           key={`node-${i}`} 
           position={node.position}
+          scale={[node.size, node.size, 1]}
           onClick={(e) => {
             e.stopPropagation();
             handleNodeClick(i);
           }}
         >
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial 
-            color="#ffffff" 
-            emissive="#ffffff"
-            emissiveIntensity={0.5}
+          <spriteMaterial 
+            map={nodeTexture}
+            transparent
+            opacity={0.7 + Math.random() * 0.3}
+            depthWrite={false}
           />
-        </mesh>
+        </sprite>
       ))}
       
-      {/* Connection lines - static */}
-      {connections.map((conn) => (
-        <line key={conn.key}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={2}
-              array={new Float32Array([...conn.start, ...conn.end])}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial color="#ffffff" opacity={0.2} transparent />
-        </line>
-      ))}
+      {/* Connection lines - curved with random fading */}
+      {connections.map((conn) => {
+        const points = conn.curve.getPoints(20); // Get 20 points along the curve
+        const positions = new Float32Array(points.length * 3);
+        points.forEach((point, i) => {
+          positions[i * 3] = point.x;
+          positions[i * 3 + 1] = point.y;
+          positions[i * 3 + 2] = point.z;
+        });
+        
+        return (
+          <line key={conn.key}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={points.length}
+                array={positions}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <lineBasicMaterial color="#ffffff" opacity={conn.opacity} transparent />
+          </line>
+        );
+      })}
       
       {/* Active flowing glows */}
       {activeFlows.map((flow, i) => (
