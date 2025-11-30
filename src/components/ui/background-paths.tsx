@@ -439,7 +439,7 @@ export function BackgroundPaths({
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
         <Canvas
-          camera={{ position: [0, 0, 60], fov: 60 }}
+          camera={{ position: [0, 0, 45], fov: 60 }}
           style={{ background: 'transparent' }}
         >
           <ambientLight intensity={0.5} />
