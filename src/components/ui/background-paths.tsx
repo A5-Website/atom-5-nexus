@@ -33,48 +33,55 @@ function FlowingGlow({
     if (!lineRef.current) return;
     
     const elapsedTime = state.clock.elapsedTime - startTime;
-    const duration = 3; // Slower duration
+    const duration = 3;
     const t = Math.min(elapsedTime / duration, 1);
     
     if (t >= 1) {
-      // Hide the line when animation is complete
       lineRef.current.visible = false;
       return;
     }
     
     lineRef.current.visible = true;
     
-    // Calculate segment length (smaller segment)
-    const segmentLength = 0.05;
-    const startT = Math.max(0, t - segmentLength / 2);
-    const endT = Math.min(1, t + segmentLength / 2);
+    // Larger segment with gradient falloff
+    const segmentLength = 0.15;
+    const startT = Math.max(0, t - segmentLength);
+    const endT = Math.min(1, t + segmentLength);
     
-    // Interpolate positions
-    const startPos = new THREE.Vector3(
-      start[0] + (end[0] - start[0]) * startT,
-      start[1] + (end[1] - start[1]) * startT,
-      start[2] + (end[2] - start[2]) * startT
-    );
+    // Create multiple points for gradient effect
+    const numPoints = 10;
+    const positions = new Float32Array(numPoints * 3);
+    const colors = new Float32Array(numPoints * 3);
     
-    const endPos = new THREE.Vector3(
-      start[0] + (end[0] - start[0]) * endT,
-      start[1] + (end[1] - start[1]) * endT,
-      start[2] + (end[2] - start[2]) * endT
-    );
-    
-    const positions = new Float32Array([
-      startPos.x, startPos.y, startPos.z,
-      endPos.x, endPos.y, endPos.z
-    ]);
+    for (let i = 0; i < numPoints; i++) {
+      const segmentT = startT + (endT - startT) * (i / (numPoints - 1));
+      const distanceFromCenter = Math.abs(segmentT - t) / segmentLength;
+      
+      // Gaussian-like falloff for smooth gradient
+      const alpha = Math.exp(-distanceFromCenter * distanceFromCenter * 8);
+      
+      positions[i * 3] = start[0] + (end[0] - start[0]) * segmentT;
+      positions[i * 3 + 1] = start[1] + (end[1] - start[1]) * segmentT;
+      positions[i * 3 + 2] = start[2] + (end[2] - start[2]) * segmentT;
+      
+      colors[i * 3] = alpha;
+      colors[i * 3 + 1] = alpha;
+      colors[i * 3 + 2] = alpha;
+    }
     
     lineRef.current.geometry.setAttribute(
       'position',
       new THREE.BufferAttribute(positions, 3)
     );
+    lineRef.current.geometry.setAttribute(
+      'color',
+      new THREE.BufferAttribute(colors, 3)
+    );
     lineRef.current.geometry.attributes.position.needsUpdate = true;
+    lineRef.current.geometry.attributes.color.needsUpdate = true;
     
-    // Fade out as it approaches end
-    const opacity = Math.sin(t * Math.PI) * 0.9;
+    // Overall fade based on lifecycle
+    const opacity = Math.sin(t * Math.PI) * 0.4;
     if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
       lineRef.current.material.opacity = opacity;
     }
@@ -82,13 +89,31 @@ function FlowingGlow({
   
   const geometry = useMemo(() => {
     const geom = new THREE.BufferGeometry();
-    const positions = new Float32Array([...start, ...end]);
+    const numPoints = 10;
+    const positions = new Float32Array(numPoints * 3);
+    const colors = new Float32Array(numPoints * 3);
+    
+    for (let i = 0; i < numPoints; i++) {
+      positions[i * 3] = start[0];
+      positions[i * 3 + 1] = start[1];
+      positions[i * 3 + 2] = start[2];
+      colors[i * 3] = 1;
+      colors[i * 3 + 1] = 1;
+      colors[i * 3 + 2] = 1;
+    }
+    
     geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     return geom;
   }, [start, end]);
   
   const material = useMemo(() => {
-    return new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
+    return new THREE.LineBasicMaterial({ 
+      vertexColors: true,
+      transparent: true, 
+      opacity: 1,
+      blending: THREE.AdditiveBlending
+    });
   }, []);
   
   return <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />;
@@ -244,7 +269,7 @@ function NeuralNetwork3D() {
           start: node.position,
           end: nodes[connIndex].position,
           curve,
-          opacity: 0.1 + Math.random() * 0.2, // Random opacity between 0.1 and 0.3
+          opacity: 0.05 + Math.random() * 0.1, // More faded: 0.05 to 0.15
           key: `${i}-${connIndex}`,
         });
       });
