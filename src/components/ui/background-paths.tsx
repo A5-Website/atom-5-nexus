@@ -11,7 +11,7 @@ interface NodeData {
   connections: number[];
 }
 
-function FlowingParticle({ 
+function FlowingGlow({ 
   start, 
   end, 
   delay 
@@ -20,37 +20,60 @@ function FlowingParticle({
   end: [number, number, number]; 
   delay: number;
 }) {
-  const particleRef = useRef<THREE.Mesh>(null);
+  const lineRef = useRef<THREE.Line>(null);
   
   useFrame((state) => {
-    if (!particleRef.current) return;
+    if (!lineRef.current) return;
     
-    const time = (state.clock.elapsedTime + delay) % 3;
-    const t = time / 3;
+    const time = (state.clock.elapsedTime + delay) % 2.5;
+    const t = time / 2.5;
     
-    particleRef.current.position.x = start[0] + (end[0] - start[0]) * t;
-    particleRef.current.position.y = start[1] + (end[1] - start[1]) * t;
-    particleRef.current.position.z = start[2] + (end[2] - start[2]) * t;
+    // Calculate segment length (10% of total line)
+    const segmentLength = 0.15;
+    const startT = Math.max(0, t - segmentLength / 2);
+    const endT = Math.min(1, t + segmentLength / 2);
     
-    // Fade in and out
-    const opacity = Math.sin(t * Math.PI) * 0.8 + 0.2;
-    if (particleRef.current.material instanceof THREE.MeshBasicMaterial) {
-      particleRef.current.material.opacity = opacity;
+    // Interpolate positions
+    const startPos = [
+      start[0] + (end[0] - start[0]) * startT,
+      start[1] + (end[1] - start[1]) * startT,
+      start[2] + (end[2] - start[2]) * startT,
+    ];
+    
+    const endPos = [
+      start[0] + (end[0] - start[0]) * endT,
+      start[1] + (end[1] - start[1]) * endT,
+      start[2] + (end[2] - start[2]) * endT,
+    ];
+    
+    const positions = new Float32Array([...startPos, ...endPos]);
+    lineRef.current.geometry.setAttribute(
+      'position',
+      new THREE.BufferAttribute(positions, 3)
+    );
+    
+    // Pulse opacity
+    const opacity = Math.sin(t * Math.PI) * 0.7 + 0.3;
+    if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
+      lineRef.current.material.opacity = opacity;
     }
   });
   
   return (
-    <mesh ref={particleRef}>
-      <sphereGeometry args={[0.08, 8, 8]} />
-      <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
-    </mesh>
+    <primitive object={new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(...start),
+        new THREE.Vector3(...end)
+      ]),
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 })
+    )} ref={lineRef} />
   );
 }
 
 function NeuralNetwork3D() {
   const nodes: NodeData[] = useMemo(() => {
     const nodeList: NodeData[] = [];
-    const numNodes = 30;
+    const numNodes = 60;
     
     // Generate random node positions in 3D space
     for (let i = 0; i < numNodes; i++) {
@@ -66,7 +89,7 @@ function NeuralNetwork3D() {
     
     // Create connections between nearby nodes
     for (let i = 0; i < nodeList.length; i++) {
-      const maxConnections = 2 + Math.floor(Math.random() * 3);
+      const maxConnections = 3 + Math.floor(Math.random() * 4);
       let connectionCount = 0;
       
       // Find nearby nodes to connect to
@@ -118,11 +141,11 @@ function NeuralNetwork3D() {
       {/* Node spheres */}
       {nodes.map((node, i) => (
         <mesh key={`node-${i}`} position={node.position}>
-          <sphereGeometry args={[0.25, 16, 16]} />
+          <sphereGeometry args={[0.15, 12, 12]} />
           <meshStandardMaterial 
             color="#ffffff" 
             emissive="#ffffff"
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.4}
           />
         </mesh>
       ))}
@@ -142,13 +165,13 @@ function NeuralNetwork3D() {
         </line>
       ))}
       
-      {/* Flowing particles */}
+      {/* Flowing glows */}
       {connections.map((conn, i) => (
-        <FlowingParticle
-          key={`particle-${conn.key}`}
+        <FlowingGlow
+          key={`glow-${conn.key}`}
           start={conn.start}
           end={conn.end}
-          delay={i * 0.1}
+          delay={i * 0.08}
         />
       ))}
     </>
