@@ -25,11 +25,11 @@ function FlowingGlow({
   useFrame((state) => {
     if (!lineRef.current) return;
     
-    const time = (state.clock.elapsedTime + delay) % 2.5;
-    const t = time / 2.5;
+    const time = (state.clock.elapsedTime + delay) % 1.5;
+    const t = time / 1.5;
     
-    // Calculate segment length (10% of total line)
-    const segmentLength = 0.15;
+    // Calculate segment length (smaller segment)
+    const segmentLength = 0.08;
     const startT = Math.max(0, t - segmentLength / 2);
     const endT = Math.min(1, t + segmentLength / 2);
     
@@ -73,7 +73,7 @@ function FlowingGlow({
 function NeuralNetwork3D() {
   const nodes: NodeData[] = useMemo(() => {
     const nodeList: NodeData[] = [];
-    const numNodes = 60;
+    const numNodes = 100;
     
     // Generate random node positions in 3D space
     for (let i = 0; i < numNodes; i++) {
@@ -89,7 +89,7 @@ function NeuralNetwork3D() {
     
     // Create connections between nearby nodes
     for (let i = 0; i < nodeList.length; i++) {
-      const maxConnections = 3 + Math.floor(Math.random() * 4);
+      const maxConnections = 4 + Math.floor(Math.random() * 3);
       let connectionCount = 0;
       
       // Find nearby nodes to connect to
@@ -141,11 +141,11 @@ function NeuralNetwork3D() {
       {/* Node spheres */}
       {nodes.map((node, i) => (
         <mesh key={`node-${i}`} position={node.position}>
-          <sphereGeometry args={[0.15, 12, 12]} />
+          <sphereGeometry args={[0.08, 8, 8]} />
           <meshStandardMaterial 
             color="#ffffff" 
             emissive="#ffffff"
-            emissiveIntensity={0.4}
+            emissiveIntensity={0.5}
           />
         </mesh>
       ))}
