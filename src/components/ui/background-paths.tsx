@@ -397,7 +397,7 @@ function NeuralNetwork3D() {
           <spriteMaterial 
             map={nodeTexture}
             transparent
-            opacity={0.7}
+            opacity={0.55}
             depthWrite={false}
           />
         </sprite>
