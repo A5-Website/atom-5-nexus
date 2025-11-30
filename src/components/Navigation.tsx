@@ -13,7 +13,7 @@ const Navigation = () => {
           <img 
             src={logo} 
             alt="Atom 5 Engineering" 
-            className="h-12 w-12 transition-transform group-hover:scale-110"
+            className="h-10 transition-transform group-hover:scale-105"
           />
           {!isHomePage && (
             <span className="text-xl font-display text-foreground">
