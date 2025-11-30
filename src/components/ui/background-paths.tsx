@@ -293,7 +293,7 @@ function NeuralNetwork3D() {
       const randomIndex = Math.floor(Math.random() * nodes.length);
       console.log('Auto-activating node:', randomIndex);
       handleNodeClick(randomIndex);
-    }, 10000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, [nodes.length, handleNodeClick]);
