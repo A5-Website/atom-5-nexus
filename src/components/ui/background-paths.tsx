@@ -193,7 +193,7 @@ function NeuralNetwork3D() {
           (Math.random() - 0.5) * 18,
         ],
         connections: [],
-        size: 0.15 + Math.random() * 0.25, // Random sizes between 0.15 and 0.4
+        size: 0.25 + Math.random() * 0.35, // Bigger random sizes between 0.25 and 0.6
       });
     }
     
@@ -408,8 +408,6 @@ function NeuralNetwork3D() {
             transparent
             opacity={conn.opacity}
             depthWrite={false}
-            blending={THREE.AdditiveBlending}
-            side={THREE.DoubleSide}
           />
         </mesh>
       ))}
