@@ -2,9 +2,35 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useRef, useMemo, useState, useCallback, useEffect } from "react";
+import { useRef, useMemo, useState, useCallback, useEffect, Component, ReactNode } from "react";
 import * as THREE from "three";
 import { motion } from "framer-motion";
+
+// Error boundary to catch WebGL errors
+class CanvasErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('Canvas error caught:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 interface NodeData {
   position: [number, number, number];
@@ -454,25 +480,55 @@ export function BackgroundPaths({
   title?: string;
 }) {
   const words = title.split(" ");
+  const [webglSupported, setWebglSupported] = useState(true);
+
+  // Check WebGL support on mount
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      console.warn('WebGL not supported, using fallback background');
+      setWebglSupported(false);
+    }
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
-      <div className="absolute inset-0">
-        <Canvas
-          camera={{ position: [18, 18, 18], fov: 60 }}
-          style={{ background: 'transparent' }}
-        >
-          <ambientLight intensity={0.2} />
-          <pointLight position={[10, 10, 10]} intensity={0.3} />
-          <NeuralNetwork3D />
-          <OrbitControls 
-            enableDamping
-            dampingFactor={0.05}
-            minDistance={15}
-            maxDistance={60}
-          />
-        </Canvas>
-      </div>
+      {webglSupported ? (
+        <div className="absolute inset-0">
+          <CanvasErrorBoundary
+            fallback={
+              <div className="w-full h-full bg-background" />
+            }
+          >
+            <Canvas
+              camera={{ position: [18, 18, 18], fov: 60 }}
+              style={{ background: 'transparent' }}
+              onCreated={(state) => {
+                console.log('Canvas created successfully');
+              }}
+              gl={{ 
+                powerPreference: "high-performance",
+                antialias: false,
+                stencil: false,
+                depth: true
+              }}
+            >
+              <ambientLight intensity={0.2} />
+              <pointLight position={[10, 10, 10]} intensity={0.3} />
+              <NeuralNetwork3D />
+              <OrbitControls 
+                enableDamping
+                dampingFactor={0.05}
+                minDistance={15}
+                maxDistance={60}
+              />
+            </Canvas>
+          </CanvasErrorBoundary>
+        </div>
+      ) : (
+        <div className="absolute inset-0 bg-background" />
+      )}
 
       <div className="relative z-10 px-8 pointer-events-none">
         <motion.div
