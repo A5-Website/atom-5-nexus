@@ -1,226 +1,157 @@
 "use client";
 
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { useRef, useMemo } from "react";
+import * as THREE from "three";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 
-interface Synapse {
-  id: string;
-  x: number;
-  y: number;
-  pulseDelay: number;
+interface NodeData {
+  position: [number, number, number];
+  connections: number[];
 }
 
-interface DendritePath {
-  id: string;
-  d: string;
-  thickness: number;
-  synapses: Synapse[];
-}
-
-function NeuralNetwork() {
-  const { dendrites, synapses, signals } = useMemo(() => {
-    const paths: DendritePath[] = [];
-    const allSynapses: Synapse[] = [];
-    const allSignals: { id: string; pathD: string; delay: number; duration: number }[] = [];
-    let synapseCounter = 0;
+function FlowingParticle({ 
+  start, 
+  end, 
+  delay 
+}: { 
+  start: [number, number, number]; 
+  end: [number, number, number]; 
+  delay: number;
+}) {
+  const particleRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (!particleRef.current) return;
     
-    // Helper to generate branching dendrites
-    const generateBranch = (
-      startX: number,
-      startY: number,
-      angle: number,
-      length: number,
-      thickness: number,
-      depth: number,
-      id: string
-    ) => {
-      if (depth > 3 || length < 40) return;
-      
-      const endX = startX + Math.cos(angle) * length;
-      const endY = startY + Math.sin(angle) * length;
-      
-      // Create smooth organic curve
-      const controlX = startX + Math.cos(angle) * length * 0.5 + (Math.random() - 0.5) * 40;
-      const controlY = startY + Math.sin(angle) * length * 0.5 + (Math.random() - 0.5) * 40;
-      
-      const pathD = `M${startX},${startY} Q${controlX},${controlY} ${endX},${endY}`;
-      
-      // Add synapse at end point (connection point)
-      const synapse: Synapse = {
-        id: `synapse-${synapseCounter++}`,
-        x: endX,
-        y: endY,
-        pulseDelay: Math.random() * 8,
-      };
-      allSynapses.push(synapse);
-      
-      // Add action potential signals along this path
-      const numSignals = Math.floor(Math.random() * 2) + 1;
-      for (let i = 0; i < numSignals; i++) {
-        allSignals.push({
-          id: `${id}-signal-${i}`,
-          pathD,
-          delay: Math.random() * 10,
-          duration: 2 + Math.random() * 1.5,
-        });
-      }
-      
-      paths.push({
-        id,
-        d: pathD,
-        thickness,
-        synapses: [synapse],
+    const time = (state.clock.elapsedTime + delay) % 3;
+    const t = time / 3;
+    
+    particleRef.current.position.x = start[0] + (end[0] - start[0]) * t;
+    particleRef.current.position.y = start[1] + (end[1] - start[1]) * t;
+    particleRef.current.position.z = start[2] + (end[2] - start[2]) * t;
+    
+    // Fade in and out
+    const opacity = Math.sin(t * Math.PI) * 0.8 + 0.2;
+    if (particleRef.current.material instanceof THREE.MeshBasicMaterial) {
+      particleRef.current.material.opacity = opacity;
+    }
+  });
+  
+  return (
+    <mesh ref={particleRef}>
+      <sphereGeometry args={[0.08, 8, 8]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+    </mesh>
+  );
+}
+
+function NeuralNetwork3D() {
+  const nodes: NodeData[] = useMemo(() => {
+    const nodeList: NodeData[] = [];
+    const numNodes = 30;
+    
+    // Generate random node positions in 3D space
+    for (let i = 0; i < numNodes; i++) {
+      nodeList.push({
+        position: [
+          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 15,
+        ],
+        connections: [],
       });
+    }
+    
+    // Create connections between nearby nodes
+    for (let i = 0; i < nodeList.length; i++) {
+      const maxConnections = 2 + Math.floor(Math.random() * 3);
+      let connectionCount = 0;
       
-      // Branch out - fewer branches for simpler structure
-      const numBranches = depth === 0 ? 2 : Math.random() > 0.5 ? 1 : 2;
+      // Find nearby nodes to connect to
+      const distances = nodeList
+        .map((node, j) => {
+          if (i === j) return null;
+          const dx = node.position[0] - nodeList[i].position[0];
+          const dy = node.position[1] - nodeList[i].position[1];
+          const dz = node.position[2] - nodeList[i].position[2];
+          return { index: j, distance: Math.sqrt(dx * dx + dy * dy + dz * dz) };
+        })
+        .filter((item): item is { index: number; distance: number } => item !== null)
+        .sort((a, b) => a.distance - b.distance);
       
-      for (let i = 0; i < numBranches; i++) {
-        const angleVariation = (Math.random() - 0.5) * Math.PI * 0.7;
-        const newAngle = angle + angleVariation;
-        const newLength = length * (0.65 + Math.random() * 0.15);
-        const newThickness = thickness * 0.75;
-        
-        generateBranch(
-          endX,
-          endY,
-          newAngle,
-          newLength,
-          newThickness,
-          depth + 1,
-          `${id}-${i}`
-        );
+      for (const { index, distance } of distances) {
+        if (connectionCount >= maxConnections) break;
+        if (distance < 8) {
+          nodeList[i].connections.push(index);
+          connectionCount++;
+        }
       }
-    };
+    }
     
-    // Generate fewer, larger neural trees
-    const startPoints = [
-      { x: 80, y: 180, angle: Math.PI / 6 },
-      { x: 240, y: 100, angle: Math.PI / 2.5 },
-      { x: 400, y: 200, angle: -Math.PI / 4 },
-      { x: 150, y: 300, angle: -Math.PI / 6 },
-      { x: 350, y: 50, angle: Math.PI / 3 },
-    ];
+    return nodeList;
+  }, []);
+  
+  const connections = useMemo(() => {
+    const lines: Array<{
+      start: [number, number, number];
+      end: [number, number, number];
+      key: string;
+    }> = [];
     
-    startPoints.forEach((point, idx) => {
-      const thickness = 2.5 + Math.random() * 1.5; // Thicker highways
-      const length = 80 + Math.random() * 40; // Larger lengths
-      generateBranch(point.x, point.y, point.angle, length, thickness, 0, `dendrite-${idx}`);
+    nodes.forEach((node, i) => {
+      node.connections.forEach((connIndex) => {
+        lines.push({
+          start: node.position,
+          end: nodes[connIndex].position,
+          key: `${i}-${connIndex}`,
+        });
+      });
     });
     
-    return { dendrites: paths, synapses: allSynapses, signals: allSignals };
-  }, []);
-
+    return lines;
+  }, [nodes]);
+  
   return (
-    <div className="absolute inset-0 pointer-events-none opacity-70">
-      <svg
-        className="w-full h-full text-foreground"
-        viewBox="0 0 480 360"
-        fill="none"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <title>Neural Network Pathways</title>
-        
-        {/* Dendrite paths */}
-        {dendrites.map((dendrite) => (
-          <motion.path
-            key={dendrite.id}
-            d={dendrite.d}
-            stroke="currentColor"
-            strokeWidth={dendrite.thickness}
-            fill="none"
-            strokeOpacity={0.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{
-              pathLength: 1,
-              opacity: [0.5, 0.7, 0.5],
-            }}
-            transition={{
-              pathLength: {
-                duration: 2.5,
-                ease: "easeOut",
-              },
-              opacity: {
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              },
-            }}
+    <>
+      {/* Node spheres */}
+      {nodes.map((node, i) => (
+        <mesh key={`node-${i}`} position={node.position}>
+          <sphereGeometry args={[0.25, 16, 16]} />
+          <meshStandardMaterial 
+            color="#ffffff" 
+            emissive="#ffffff"
+            emissiveIntensity={0.3}
           />
-        ))}
-        
-        {/* Synaptic nodes - glow and pulse */}
-        {synapses.map((synapse) => (
-          <g key={synapse.id}>
-            {/* Glow effect */}
-            <motion.circle
-              cx={synapse.x}
-              cy={synapse.y}
-              r="6"
-              fill="currentColor"
-              opacity="0.3"
-              initial={{ scale: 0.8, opacity: 0.2 }}
-              animate={{
-                scale: [0.8, 1.3, 0.8],
-                opacity: [0.2, 0.5, 0.2],
-              }}
-              transition={{
-                duration: 2.5,
-                delay: synapse.pulseDelay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+        </mesh>
+      ))}
+      
+      {/* Connection lines */}
+      {connections.map((conn) => (
+        <line key={conn.key}>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              count={2}
+              array={new Float32Array([...conn.start, ...conn.end])}
+              itemSize={3}
             />
-            {/* Core node */}
-            <motion.circle
-              cx={synapse.x}
-              cy={synapse.y}
-              r="2.5"
-              fill="currentColor"
-              opacity="0.9"
-              initial={{ scale: 0.9 }}
-              animate={{
-                scale: [0.9, 1.1, 0.9],
-                opacity: [0.8, 1, 0.8],
-              }}
-              transition={{
-                duration: 2.5,
-                delay: synapse.pulseDelay,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </g>
-        ))}
-        
-        {/* Action potential signals - small traveling dots */}
-        {signals.map((signal) => (
-          <motion.circle
-            key={signal.id}
-            r="1.5"
-            fill="currentColor"
-            opacity="0.95"
-            initial={{ offsetDistance: "0%", opacity: 0 }}
-            animate={{
-              offsetDistance: ["0%", "100%"],
-              opacity: [0, 1, 1, 0],
-            }}
-            transition={{
-              duration: signal.duration,
-              delay: signal.delay,
-              repeat: Infinity,
-              ease: "linear",
-              repeatDelay: 4 + Math.random() * 3,
-            }}
-            style={{
-              offsetPath: `path('${signal.pathD}')`,
-            }}
-          />
-        ))}
-      </svg>
-    </div>
+          </bufferGeometry>
+          <lineBasicMaterial color="#ffffff" opacity={0.3} transparent />
+        </line>
+      ))}
+      
+      {/* Flowing particles */}
+      {connections.map((conn, i) => (
+        <FlowingParticle
+          key={`particle-${conn.key}`}
+          start={conn.start}
+          end={conn.end}
+          delay={i * 0.1}
+        />
+      ))}
+    </>
   );
 }
 
@@ -234,10 +165,23 @@ export function BackgroundPaths({
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
-        <NeuralNetwork />
+        <Canvas
+          camera={{ position: [0, 0, 20], fov: 60 }}
+          style={{ background: 'transparent' }}
+        >
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <NeuralNetwork3D />
+          <OrbitControls 
+            enableDamping
+            dampingFactor={0.05}
+            minDistance={10}
+            maxDistance={40}
+          />
+        </Canvas>
       </div>
 
-      <div className="relative z-10 px-8">
+      <div className="relative z-10 px-8 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
