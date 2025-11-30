@@ -2,125 +2,142 @@
 
 import { motion } from "framer-motion";
 
-function CircuitPattern() {
-    // Generate intricate circuit board patterns
-    const generateCircuitPaths = () => {
-        const paths = [];
-        const gridSize = 20;
-        const spacing = 15;
+function IntricateCircuits() {
+    const generateChipCircuits = () => {
+        const elements = [];
+        const gridSpacing = 8;
+        const cols = 60;
+        const rows = 50;
         
-        // Create grid-based circuit traces
-        for (let row = 0; row < gridSize; row++) {
-            for (let col = 0; col < gridSize; col++) {
-                const x = col * spacing;
-                const y = row * spacing;
-                const progress = col / gridSize; // 0 on left, 1 on right
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const x = col * gridSpacing;
+                const y = row * gridSpacing;
+                const progress = col / cols; // 0 left (circuits), 1 right (neural)
                 
-                // Circuit traces (horizontal and vertical lines)
-                if (Math.random() > 0.3) {
-                    const horizontal = Math.random() > 0.5;
-                    const length = spacing * (1 + Math.floor(Math.random() * 3));
-                    
-                    if (horizontal) {
-                        paths.push({
+                // Left side: Dense chip-like circuits
+                if (progress < 0.4) {
+                    // Horizontal traces in groups
+                    if (row % 3 === 0 && Math.random() > 0.2) {
+                        const length = gridSpacing * (3 + Math.floor(Math.random() * 5));
+                        elements.push({
                             id: `h-${row}-${col}`,
                             d: `M${x},${y} L${x + length},${y}`,
-                            type: 'trace',
-                            progress,
+                            type: 'circuit',
                         });
-                    } else {
-                        paths.push({
+                        // Parallel traces
+                        if (Math.random() > 0.5) {
+                            elements.push({
+                                id: `h2-${row}-${col}`,
+                                d: `M${x},${y + 2} L${x + length},${y + 2}`,
+                                type: 'circuit',
+                            });
+                        }
+                    }
+                    
+                    // Vertical traces
+                    if (col % 4 === 0 && Math.random() > 0.3) {
+                        const length = gridSpacing * (2 + Math.floor(Math.random() * 4));
+                        elements.push({
                             id: `v-${row}-${col}`,
                             d: `M${x},${y} L${x},${y + length}`,
-                            type: 'trace',
-                            progress,
+                            type: 'circuit',
+                        });
+                    }
+                    
+                    // Square IC chip outlines
+                    if (row % 8 === 0 && col % 10 === 0 && Math.random() > 0.6) {
+                        const size = gridSpacing * 3;
+                        elements.push({
+                            id: `chip-${row}-${col}`,
+                            d: `M${x},${y} L${x + size},${y} L${x + size},${y + size} L${x},${y + size} Z`,
+                            type: 'chip',
                         });
                     }
                 }
                 
-                // Add junction nodes
-                if (Math.random() > 0.7) {
-                    paths.push({
-                        id: `node-${row}-${col}`,
-                        x,
-                        y,
-                        type: 'node',
-                        progress,
-                    });
+                // Middle: Transition zone
+                else if (progress >= 0.4 && progress < 0.7) {
+                    if (Math.random() > 0.5) {
+                        const angle = Math.random() * Math.PI;
+                        const length = gridSpacing * (2 + Math.random() * 3);
+                        const endX = x + Math.cos(angle) * length;
+                        const endY = y + Math.sin(angle) * length;
+                        elements.push({
+                            id: `trans-${row}-${col}`,
+                            d: `M${x},${y} L${endX},${endY}`,
+                            type: 'transition',
+                        });
+                    }
                 }
                 
-                // Add more organic curves on the right side
-                if (progress > 0.6 && Math.random() > 0.5) {
-                    const curveLength = spacing * 2;
-                    paths.push({
-                        id: `curve-${row}-${col}`,
-                        d: `M${x},${y} Q${x + curveLength/2},${y - spacing} ${x + curveLength},${y}`,
-                        type: 'neural',
-                        progress,
-                    });
+                // Right side: Neural network (organic curves)
+                else {
+                    if (Math.random() > 0.6) {
+                        const curveLength = gridSpacing * (3 + Math.random() * 4);
+                        const controlX = x + curveLength / 2 + (Math.random() - 0.5) * 20;
+                        const controlY = y + (Math.random() - 0.5) * 30;
+                        const endX = x + curveLength;
+                        const endY = y + (Math.random() - 0.5) * 20;
+                        
+                        elements.push({
+                            id: `neural-${row}-${col}`,
+                            d: `M${x},${y} Q${controlX},${controlY} ${endX},${endY}`,
+                            type: 'neural',
+                        });
+                    }
                 }
             }
         }
         
-        return paths;
+        return elements;
     };
     
-    const paths = generateCircuitPaths();
+    const circuits = generateChipCircuits();
 
     return (
-        <div className="absolute inset-0 pointer-events-none opacity-40">
+        <div className="absolute inset-0 pointer-events-none opacity-50">
             <svg
                 className="w-full h-full text-foreground"
-                viewBox="0 0 300 300"
+                viewBox="0 0 480 400"
                 fill="none"
                 preserveAspectRatio="xMidYMid slice"
             >
-                <title>Circuit Board</title>
-                {paths.map((path) => {
-                    if (path.type === 'node') {
-                        return (
-                            <motion.circle
-                                key={path.id}
-                                cx={path.x}
-                                cy={path.y}
-                                r={path.progress > 0.6 ? 1.5 : 1}
-                                fill="currentColor"
-                                initial={{ opacity: 0.3 }}
-                                animate={{
-                                    opacity: [0.3, 0.8, 0.3],
-                                    scale: [0.9, 1.1, 0.9],
-                                }}
-                                transition={{
-                                    duration: 3 + Math.random() * 2,
-                                    repeat: Number.POSITIVE_INFINITY,
-                                    delay: Math.random() * 2,
-                                }}
-                            />
-                        );
-                    }
-                    
-                    return (
-                        <motion.path
-                            key={path.id}
-                            d={path.d}
-                            stroke="currentColor"
-                            strokeWidth={path.type === 'neural' ? 0.6 : 0.4}
-                            strokeOpacity={0.6}
-                            fill="none"
-                            initial={{ pathLength: 0 }}
-                            animate={{
-                                pathLength: [0, 1, 0],
-                                opacity: [0.3, 0.7, 0.3],
-                            }}
-                            transition={{
-                                duration: 8 + Math.random() * 8,
+                <title>Circuit to Neural Network</title>
+                {circuits.map((element) => (
+                    <motion.path
+                        key={element.id}
+                        d={element.d}
+                        stroke="currentColor"
+                        strokeWidth={
+                            element.type === 'chip' ? 0.5 :
+                            element.type === 'neural' ? 0.4 :
+                            element.type === 'transition' ? 0.35 :
+                            0.3
+                        }
+                        fill={element.type === 'chip' ? 'none' : 'none'}
+                        strokeOpacity={0.6}
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{
+                            pathLength: [0, 1],
+                            opacity: element.type === 'neural' ? [0.3, 0.7, 0.3] : [0.4, 0.6, 0.4],
+                        }}
+                        transition={{
+                            pathLength: {
+                                duration: element.type === 'neural' ? 6 + Math.random() * 4 : 10 + Math.random() * 5,
                                 repeat: Number.POSITIVE_INFINITY,
                                 ease: "linear",
+                                delay: Math.random() * 8,
+                            },
+                            opacity: {
+                                duration: 4 + Math.random() * 3,
+                                repeat: Number.POSITIVE_INFINITY,
+                                ease: "easeInOut",
                                 delay: Math.random() * 5,
-                            }}
-                        />
-                    );
-                })}
+                            },
+                        }}
+                    />
+                ))}
             </svg>
         </div>
     );
@@ -136,7 +153,7 @@ export function BackgroundPaths({
     return (
         <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
             <div className="absolute inset-0">
-                <CircuitPattern />
+                <IntricateCircuits />
             </div>
 
             <div className="relative z-10 px-8">

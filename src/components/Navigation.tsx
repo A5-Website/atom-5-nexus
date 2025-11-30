@@ -14,12 +14,8 @@ const Navigation = () => {
             src={logo} 
             alt="Atom 5 Engineering" 
             className="h-10 transition-transform group-hover:scale-105"
+            style={{ mixBlendMode: 'screen' }}
           />
-          {!isHomePage && (
-            <span className="text-xl font-display text-foreground">
-              Atom 5 Engineering
-            </span>
-          )}
         </NavLink>
         
         <div className="flex items-center gap-8">
