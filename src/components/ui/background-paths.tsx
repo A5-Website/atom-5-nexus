@@ -159,6 +159,7 @@ interface NodeDataExtended extends NodeData {
 function NeuralNetwork3D() {
   const [activeFlows, setActiveFlows] = useState<ActiveFlow[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const currentTimeRef = useRef(0);
   
   // Create texture for soft-edged nodes
   const nodeTexture = useMemo(() => {
@@ -227,6 +228,7 @@ function NeuralNetwork3D() {
   }, []);
   
   useFrame((state) => {
+    currentTimeRef.current = state.clock.elapsedTime;
     setCurrentTime(state.clock.elapsedTime);
   });
   
@@ -252,7 +254,7 @@ function NeuralNetwork3D() {
           newFlows.push({
             startIndex: current.index,
             endIndex: connectedIndex,
-            startTime: currentTime + current.generation * 0.3, // Stagger by generation
+            startTime: currentTimeRef.current + current.generation * 0.3, // Stagger by generation
             generation: current.generation + 1,
           });
           
@@ -270,14 +272,15 @@ function NeuralNetwork3D() {
     setTimeout(() => {
       setActiveFlows(prev => prev.filter(flow => !newFlows.includes(flow)));
     }, 4000);
-  }, [nodes, currentTime]);
+  }, [nodes]);
   
-  // Auto-activate random nodes every 5 seconds
+  // Auto-activate random nodes every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * nodes.length);
+      console.log('Auto-activating node:', randomIndex);
       handleNodeClick(randomIndex);
-    }, 5000);
+    }, 10000);
     
     return () => clearInterval(interval);
   }, [nodes.length, handleNodeClick]);
