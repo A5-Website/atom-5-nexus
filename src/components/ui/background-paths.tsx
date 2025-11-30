@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useRef, useMemo, useState, useCallback } from "react";
+import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import * as THREE from "three";
 import { motion } from "framer-motion";
 
@@ -230,6 +230,16 @@ function NeuralNetwork3D() {
     setCurrentTime(state.clock.elapsedTime);
   });
   
+  // Auto-activate random nodes every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * nodes.length);
+      handleNodeClick(randomIndex);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [nodes.length, currentTime]);
+  
   const handleNodeClick = useCallback((nodeIndex: number) => {
     console.log('Node clicked:', nodeIndex);
     const newFlows: ActiveFlow[] = [];
@@ -301,7 +311,7 @@ function NeuralNetwork3D() {
         const tubeGeometry = new THREE.TubeGeometry(
           curve,
           tubeSegments,
-          0.008, // Even thinner base radius
+          0.005, // Ultra thin base radius
           3,
           false
         );
