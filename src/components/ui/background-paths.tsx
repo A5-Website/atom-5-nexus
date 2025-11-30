@@ -28,6 +28,7 @@ function FlowingGlow({
   startTime: number;
 }) {
   const lineRef = useRef<THREE.Line>(null);
+  const sparkleRef = useRef<THREE.Mesh>(null);
   
   useFrame((state) => {
     if (!lineRef.current) return;
@@ -38,10 +39,12 @@ function FlowingGlow({
     
     if (t >= 1) {
       lineRef.current.visible = false;
+      if (sparkleRef.current) sparkleRef.current.visible = false;
       return;
     }
     
     lineRef.current.visible = true;
+    if (sparkleRef.current) sparkleRef.current.visible = true;
     
     // Larger segment with gradient falloff
     const segmentLength = 0.15;
@@ -85,6 +88,20 @@ function FlowingGlow({
     if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
       lineRef.current.material.opacity = opacity;
     }
+    
+    // Update sparkle position (center of glow)
+    if (sparkleRef.current) {
+      sparkleRef.current.position.set(
+        start[0] + (end[0] - start[0]) * t,
+        start[1] + (end[1] - start[1]) * t,
+        start[2] + (end[2] - start[2]) * t
+      );
+      
+      // Sparkle fades with the glow
+      if (sparkleRef.current.material instanceof THREE.MeshBasicMaterial) {
+        sparkleRef.current.material.opacity = Math.sin(t * Math.PI) * 1.0;
+      }
+    }
   });
   
   const geometry = useMemo(() => {
@@ -116,7 +133,23 @@ function FlowingGlow({
     });
   }, []);
   
-  return <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />;
+  const sparkleMaterial = useMemo(() => {
+    return new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 1,
+    });
+  }, []);
+  
+  return (
+    <>
+      <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />
+      <mesh ref={sparkleRef}>
+        <sphereGeometry args={[0.02, 4, 4]} />
+        <primitive object={sparkleMaterial} />
+      </mesh>
+    </>
+  );
 }
 
 interface NodeDataExtended extends NodeData {
@@ -268,7 +301,7 @@ function NeuralNetwork3D() {
         const tubeGeometry = new THREE.TubeGeometry(
           curve,
           tubeSegments,
-          0.02, // Base radius
+          0.012, // Thinner base radius
           3,
           false
         );
@@ -314,7 +347,7 @@ function NeuralNetwork3D() {
         
         meshes.push({
           geometry: tubeGeometry,
-          opacity: 0.15 + Math.random() * 0.15,
+          opacity: 0.08 + Math.random() * 0.1, // Dimmer: 0.08 to 0.18
           key: `${i}-${connIndex}`,
         });
       });
