@@ -276,12 +276,14 @@ function NeuralNetwork3D() {
   
   // Auto-activate random nodes every 10 seconds
   useEffect(() => {
-    // Trigger immediately on mount
-    const randomIndex = Math.floor(Math.random() * nodes.length);
-    console.log('Auto-activating node on mount:', randomIndex);
-    handleNodeClick(randomIndex);
+    // Trigger 4 nodes immediately on mount for dramatic effect
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = Math.floor(Math.random() * nodes.length);
+      console.log('Auto-activating node on mount:', randomIndex);
+      setTimeout(() => handleNodeClick(randomIndex), i * 100); // Slight stagger
+    }
     
-    // Then continue every 10 seconds
+    // Then continue with single nodes every 10 seconds
     const interval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * nodes.length);
       console.log('Auto-activating node:', randomIndex);
