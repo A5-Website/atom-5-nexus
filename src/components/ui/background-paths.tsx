@@ -437,7 +437,7 @@ export function BackgroundPaths({
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
-      <div className="absolute inset-0 left-[10%]">
+      <div className="absolute inset-0">
         <Canvas
           camera={{ position: [0, 0, 60], fov: 60 }}
           style={{ background: 'transparent' }}
@@ -454,7 +454,7 @@ export function BackgroundPaths({
         </Canvas>
       </div>
 
-      <div className="relative z-10 px-8 pointer-events-none -ml-8">
+      <div className="relative z-10 px-8 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
