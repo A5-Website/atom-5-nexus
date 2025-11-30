@@ -40,12 +40,7 @@ const Contact = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat relative"
-      style={{ backgroundImage: `url(${heroBackground})` }}
-    >
-      <div className="absolute inset-0 bg-background/90 backdrop-blur-md" />
-      
+    <div className="min-h-screen bg-black relative">
       <Navigation />
       
       <main className="relative z-10 pt-32 pb-16 px-8">
