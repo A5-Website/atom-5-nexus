@@ -145,7 +145,7 @@ function FlowingGlow({
     <>
       <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />
       <mesh ref={sparkleRef}>
-        <sphereGeometry args={[0.02, 4, 4]} />
+        <sphereGeometry args={[0.008, 4, 4]} />
         <primitive object={sparkleMaterial} />
       </mesh>
     </>
@@ -301,7 +301,7 @@ function NeuralNetwork3D() {
         const tubeGeometry = new THREE.TubeGeometry(
           curve,
           tubeSegments,
-          0.012, // Thinner base radius
+          0.008, // Even thinner base radius
           3,
           false
         );
