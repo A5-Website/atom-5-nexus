@@ -480,55 +480,40 @@ export function BackgroundPaths({
   title?: string;
 }) {
   const words = title.split(" ");
-  const [webglSupported, setWebglSupported] = useState(true);
-
-  // Check WebGL support on mount
-  useEffect(() => {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) {
-      console.warn('WebGL not supported, using fallback background');
-      setWebglSupported(false);
-    }
-  }, []);
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
-      {webglSupported ? (
-        <div className="absolute inset-0">
-          <CanvasErrorBoundary
-            fallback={
-              <div className="w-full h-full bg-background" />
-            }
+      <div className="absolute inset-0">
+        <CanvasErrorBoundary
+          fallback={
+            <div className="w-full h-full bg-background">
+              <div className="absolute top-4 left-4 text-muted-foreground text-xs">
+                WebGL unavailable - displaying fallback
+              </div>
+            </div>
+          }
+        >
+          <Canvas
+            camera={{ position: [18, 18, 18], fov: 60 }}
+            style={{ background: 'transparent' }}
+            gl={{ 
+              alpha: true,
+              antialias: false,
+              powerPreference: "default"
+            }}
           >
-            <Canvas
-              camera={{ position: [18, 18, 18], fov: 60 }}
-              style={{ background: 'transparent' }}
-              onCreated={(state) => {
-                console.log('Canvas created successfully');
-              }}
-              gl={{ 
-                powerPreference: "high-performance",
-                antialias: false,
-                stencil: false,
-                depth: true
-              }}
-            >
-              <ambientLight intensity={0.2} />
-              <pointLight position={[10, 10, 10]} intensity={0.3} />
-              <NeuralNetwork3D />
-              <OrbitControls 
-                enableDamping
-                dampingFactor={0.05}
-                minDistance={15}
-                maxDistance={60}
-              />
-            </Canvas>
-          </CanvasErrorBoundary>
-        </div>
-      ) : (
-        <div className="absolute inset-0 bg-background" />
-      )}
+            <ambientLight intensity={0.2} />
+            <pointLight position={[10, 10, 10]} intensity={0.3} />
+            <NeuralNetwork3D />
+            <OrbitControls 
+              enableDamping
+              dampingFactor={0.05}
+              minDistance={15}
+              maxDistance={60}
+            />
+          </Canvas>
+        </CanvasErrorBoundary>
+      </div>
 
       <div className="relative z-10 px-8 pointer-events-none">
         <motion.div
