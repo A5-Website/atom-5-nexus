@@ -14,7 +14,6 @@ const Navigation = () => {
             src={logo} 
             alt="Atom 5 Engineering" 
             className="h-10 transition-transform group-hover:scale-105"
-            style={{ mixBlendMode: 'screen' }}
           />
         </NavLink>
         
