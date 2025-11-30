@@ -2,35 +2,9 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useRef, useMemo, useState, useCallback, useEffect, Component, ReactNode } from "react";
+import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import * as THREE from "three";
 import { motion } from "framer-motion";
-
-// Error boundary to catch WebGL errors
-class CanvasErrorBoundary extends Component<
-  { children: ReactNode; fallback: ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: ReactNode; fallback: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: Error) {
-    console.error('Canvas error caught:', error);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
 
 interface NodeData {
   position: [number, number, number];
@@ -474,70 +448,40 @@ function NeuralNetwork3D() {
   );
 }
 
-// CSS-based fallback for when WebGL is unavailable
-function CSSNetworkFallback() {
-  const nodes = useMemo(() => {
-    return Array.from({ length: 80 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 5,
-      duration: 3 + Math.random() * 4
-    }));
-  }, []);
-
-  return (
-    <div className="w-full h-full bg-background relative overflow-hidden">
-      <svg className="absolute inset-0 w-full h-full">
-        {nodes.map((node, i) => (
-          <g key={i}>
-            <circle
-              cx={`${node.x}%`}
-              cy={`${node.y}%`}
-              r="4"
-              fill="white"
-              opacity="0.4"
-              className="animate-pulse"
-              style={{
-                animationDelay: `${node.delay}s`,
-                animationDuration: `${node.duration}s`
-              }}
-            />
-            {i > 0 && i % 2 === 0 && (
-              <line
-                x1={`${nodes[i - 1].x}%`}
-                y1={`${nodes[i - 1].y}%`}
-                x2={`${node.x}%`}
-                y2={`${node.y}%`}
-                stroke="white"
-                strokeWidth="1"
-                opacity="0.25"
-              />
-            )}
-          </g>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
 export function BackgroundPaths({
   title = "Background Paths",
 }: {
   title?: string;
 }) {
   const words = title.split(" ");
+  const [webglSupported, setWebglSupported] = useState(true);
+
+  // Check WebGL support on mount
+  useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        setWebglSupported(false);
+      }
+    } catch (e) {
+      setWebglSupported(false);
+    }
+  }, []);
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
-      <div className="absolute inset-0">
-        <CanvasErrorBoundary fallback={<CSSNetworkFallback />}>
+      {webglSupported && (
+        <div className="absolute inset-0">
           <Canvas
             camera={{ position: [18, 18, 18], fov: 60 }}
             style={{ background: 'transparent' }}
-            gl={{ 
-              alpha: true,
-              antialias: false,
-              powerPreference: "default"
+            onCreated={(state) => {
+              // Successfully created
+            }}
+            onError={(error) => {
+              console.error('Canvas error:', error);
+              setWebglSupported(false);
             }}
           >
             <ambientLight intensity={0.2} />
@@ -550,8 +494,8 @@ export function BackgroundPaths({
               maxDistance={60}
             />
           </Canvas>
-        </CanvasErrorBoundary>
-      </div>
+        </div>
+      )}
 
       <div className="relative z-10 px-8 pointer-events-none">
         <motion.div
