@@ -2,88 +2,108 @@
 
 import { motion } from "framer-motion";
 
-function IntricateCircuits() {
-    const generateChipCircuits = () => {
+function MotherboardCircuits() {
+    const generateMotherboardPattern = () => {
         const elements = [];
-        const gridSpacing = 8;
-        const cols = 60;
-        const rows = 50;
+        const gridSpacing = 6;
+        const cols = 80;
+        const rows = 60;
         
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const x = col * gridSpacing;
                 const y = row * gridSpacing;
-                const progress = col / cols; // 0 left (circuits), 1 right (neural)
                 
-                // Left side: Dense chip-like circuits
-                if (progress < 0.4) {
-                    // Horizontal traces in groups
-                    if (row % 3 === 0 && Math.random() > 0.2) {
-                        const length = gridSpacing * (3 + Math.floor(Math.random() * 5));
+                // Check if in middle zone for neural patterns
+                const distanceFromCenter = Math.abs(col - cols/2) / (cols/2);
+                const isMiddleZone = distanceFromCenter < 0.3;
+                
+                if (isMiddleZone && Math.random() > 0.7) {
+                    // Neural organic curves in middle
+                    const curveLength = gridSpacing * (4 + Math.random() * 6);
+                    const controlX = x + curveLength / 2 + (Math.random() - 0.5) * 30;
+                    const controlY = y + (Math.random() - 0.5) * 40;
+                    const endX = x + curveLength;
+                    const endY = y + (Math.random() - 0.5) * 30;
+                    
+                    elements.push({
+                        id: `neural-${row}-${col}`,
+                        d: `M${x},${y} Q${controlX},${controlY} ${endX},${endY}`,
+                        type: 'neural',
+                    });
+                } else {
+                    // Motherboard PCB traces everywhere else
+                    
+                    // Dense horizontal traces in groups
+                    if (row % 2 === 0 && Math.random() > 0.15) {
+                        const length = gridSpacing * (4 + Math.floor(Math.random() * 8));
                         elements.push({
                             id: `h-${row}-${col}`,
                             d: `M${x},${y} L${x + length},${y}`,
-                            type: 'circuit',
+                            type: 'trace',
                         });
-                        // Parallel traces
-                        if (Math.random() > 0.5) {
+                        
+                        // Parallel trace above/below
+                        if (Math.random() > 0.4) {
+                            const offset = Math.random() > 0.5 ? 1.5 : -1.5;
                             elements.push({
-                                id: `h2-${row}-${col}`,
-                                d: `M${x},${y + 2} L${x + length},${y + 2}`,
-                                type: 'circuit',
+                                id: `h-par-${row}-${col}`,
+                                d: `M${x},${y + offset} L${x + length},${y + offset}`,
+                                type: 'trace',
                             });
                         }
                     }
                     
                     // Vertical traces
-                    if (col % 4 === 0 && Math.random() > 0.3) {
-                        const length = gridSpacing * (2 + Math.floor(Math.random() * 4));
+                    if (col % 3 === 0 && Math.random() > 0.2) {
+                        const length = gridSpacing * (3 + Math.floor(Math.random() * 6));
                         elements.push({
                             id: `v-${row}-${col}`,
                             d: `M${x},${y} L${x},${y + length}`,
-                            type: 'circuit',
+                            type: 'trace',
                         });
                     }
                     
-                    // Square IC chip outlines
-                    if (row % 8 === 0 && col % 10 === 0 && Math.random() > 0.6) {
-                        const size = gridSpacing * 3;
+                    // L-shaped traces (right angles like PCB routing)
+                    if (Math.random() > 0.7) {
+                        const hLen = gridSpacing * (2 + Math.floor(Math.random() * 4));
+                        const vLen = gridSpacing * (2 + Math.floor(Math.random() * 4));
+                        const dir = Math.random() > 0.5 ? 1 : -1;
+                        elements.push({
+                            id: `l-${row}-${col}`,
+                            d: `M${x},${y} L${x + hLen},${y} L${x + hLen},${y + vLen * dir}`,
+                            type: 'trace',
+                        });
+                    }
+                    
+                    // IC chip rectangles
+                    if (row % 10 === 0 && col % 12 === 0 && Math.random() > 0.5) {
+                        const width = gridSpacing * 6;
+                        const height = gridSpacing * 4;
                         elements.push({
                             id: `chip-${row}-${col}`,
-                            d: `M${x},${y} L${x + size},${y} L${x + size},${y + size} L${x},${y + size} Z`,
+                            d: `M${x},${y} L${x + width},${y} L${x + width},${y + height} L${x},${y + height} Z`,
                             type: 'chip',
                         });
-                    }
-                }
-                
-                // Middle: Transition zone
-                else if (progress >= 0.4 && progress < 0.7) {
-                    if (Math.random() > 0.5) {
-                        const angle = Math.random() * Math.PI;
-                        const length = gridSpacing * (2 + Math.random() * 3);
-                        const endX = x + Math.cos(angle) * length;
-                        const endY = y + Math.sin(angle) * length;
-                        elements.push({
-                            id: `trans-${row}-${col}`,
-                            d: `M${x},${y} L${endX},${endY}`,
-                            type: 'transition',
-                        });
-                    }
-                }
-                
-                // Right side: Neural network (organic curves)
-                else {
-                    if (Math.random() > 0.6) {
-                        const curveLength = gridSpacing * (3 + Math.random() * 4);
-                        const controlX = x + curveLength / 2 + (Math.random() - 0.5) * 20;
-                        const controlY = y + (Math.random() - 0.5) * 30;
-                        const endX = x + curveLength;
-                        const endY = y + (Math.random() - 0.5) * 20;
                         
+                        // Chip pins
+                        for (let pin = 0; pin < 8; pin++) {
+                            const pinX = x + (pin * width / 7);
+                            elements.push({
+                                id: `pin-${row}-${col}-${pin}`,
+                                d: `M${pinX},${y} L${pinX},${y - 3}`,
+                                type: 'pin',
+                            });
+                        }
+                    }
+                    
+                    // Resistor/capacitor patterns
+                    if (Math.random() > 0.85) {
+                        const compWidth = gridSpacing * 2;
                         elements.push({
-                            id: `neural-${row}-${col}`,
-                            d: `M${x},${y} Q${controlX},${controlY} ${endX},${endY}`,
-                            type: 'neural',
+                            id: `comp-${row}-${col}`,
+                            d: `M${x},${y} L${x + 2},${y} L${x + 2},${y + 2} L${x + compWidth - 2},${y + 2} L${x + compWidth - 2},${y} L${x + compWidth},${y}`,
+                            type: 'component',
                         });
                     }
                 }
@@ -93,47 +113,49 @@ function IntricateCircuits() {
         return elements;
     };
     
-    const circuits = generateChipCircuits();
+    const circuits = generateMotherboardPattern();
 
     return (
-        <div className="absolute inset-0 pointer-events-none opacity-50">
+        <div className="absolute inset-0 pointer-events-none opacity-60">
             <svg
                 className="w-full h-full text-foreground"
-                viewBox="0 0 480 400"
+                viewBox="0 0 480 360"
                 fill="none"
                 preserveAspectRatio="xMidYMid slice"
             >
-                <title>Circuit to Neural Network</title>
+                <title>Motherboard Circuits with Neural Network</title>
                 {circuits.map((element) => (
                     <motion.path
                         key={element.id}
                         d={element.d}
                         stroke="currentColor"
                         strokeWidth={
-                            element.type === 'chip' ? 0.5 :
-                            element.type === 'neural' ? 0.4 :
-                            element.type === 'transition' ? 0.35 :
-                            0.3
+                            element.type === 'chip' ? 1 :
+                            element.type === 'neural' ? 0.8 :
+                            element.type === 'pin' ? 0.6 :
+                            element.type === 'component' ? 0.7 :
+                            0.6
                         }
-                        fill={element.type === 'chip' ? 'none' : 'none'}
-                        strokeOpacity={0.6}
+                        fill="none"
+                        strokeOpacity={element.type === 'neural' ? 0.7 : 0.8}
+                        strokeLinecap="square"
                         initial={{ pathLength: 0, opacity: 0 }}
                         animate={{
                             pathLength: [0, 1],
-                            opacity: element.type === 'neural' ? [0.3, 0.7, 0.3] : [0.4, 0.6, 0.4],
+                            opacity: element.type === 'neural' ? [0.4, 0.8, 0.4] : [0.6, 0.8, 0.6],
                         }}
                         transition={{
                             pathLength: {
-                                duration: element.type === 'neural' ? 6 + Math.random() * 4 : 10 + Math.random() * 5,
+                                duration: element.type === 'neural' ? 5 + Math.random() * 3 : 12 + Math.random() * 8,
                                 repeat: Number.POSITIVE_INFINITY,
                                 ease: "linear",
-                                delay: Math.random() * 8,
+                                delay: Math.random() * 10,
                             },
                             opacity: {
-                                duration: 4 + Math.random() * 3,
+                                duration: 3 + Math.random() * 2,
                                 repeat: Number.POSITIVE_INFINITY,
                                 ease: "easeInOut",
-                                delay: Math.random() * 5,
+                                delay: Math.random() * 4,
                             },
                         }}
                     />
@@ -153,7 +175,7 @@ export function BackgroundPaths({
     return (
         <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
             <div className="absolute inset-0">
-                <IntricateCircuits />
+                <MotherboardCircuits />
             </div>
 
             <div className="relative z-10 px-8">
