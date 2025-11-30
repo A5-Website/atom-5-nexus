@@ -188,9 +188,9 @@ function NeuralNetwork3D() {
     for (let i = 0; i < numNodes; i++) {
       nodeList.push({
         position: [
-          (Math.random() - 0.5) * 18,
-          (Math.random() - 0.5) * 18,
-          (Math.random() - 0.5) * 18,
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 14,
         ],
         connections: [],
         size: 0.25 + Math.random() * 0.35, // Bigger random sizes between 0.25 and 0.6
