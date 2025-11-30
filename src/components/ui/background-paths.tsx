@@ -1,8 +1,8 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useCallback } from "react";
 import * as THREE from "three";
 import { motion } from "framer-motion";
 
@@ -11,53 +11,61 @@ interface NodeData {
   connections: number[];
 }
 
+interface ActiveFlow {
+  startIndex: number;
+  endIndex: number;
+  startTime: number;
+  generation: number;
+}
+
 function FlowingGlow({ 
   start, 
   end, 
-  delay 
+  startTime,
+  currentTime 
 }: { 
   start: [number, number, number]; 
   end: [number, number, number]; 
-  delay: number;
+  startTime: number;
+  currentTime: number;
 }) {
   const lineRef = useRef<THREE.Line>(null);
   
-  useFrame((state) => {
-    if (!lineRef.current) return;
-    
-    const time = (state.clock.elapsedTime + delay) % 1.5;
-    const t = time / 1.5;
-    
-    // Calculate segment length (smaller segment)
-    const segmentLength = 0.08;
-    const startT = Math.max(0, t - segmentLength / 2);
-    const endT = Math.min(1, t + segmentLength / 2);
-    
-    // Interpolate positions
-    const startPos = [
-      start[0] + (end[0] - start[0]) * startT,
-      start[1] + (end[1] - start[1]) * startT,
-      start[2] + (end[2] - start[2]) * startT,
-    ];
-    
-    const endPos = [
-      start[0] + (end[0] - start[0]) * endT,
-      start[1] + (end[1] - start[1]) * endT,
-      start[2] + (end[2] - start[2]) * endT,
-    ];
-    
-    const positions = new Float32Array([...startPos, ...endPos]);
-    lineRef.current.geometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(positions, 3)
-    );
-    
-    // Pulse opacity
-    const opacity = Math.sin(t * Math.PI) * 0.7 + 0.3;
-    if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
-      lineRef.current.material.opacity = opacity;
-    }
-  });
+  const elapsedTime = currentTime - startTime;
+  const duration = 3; // Slower duration
+  const t = Math.min(elapsedTime / duration, 1);
+  
+  if (t >= 1 || !lineRef.current) return null;
+  
+  // Calculate segment length (smaller segment)
+  const segmentLength = 0.05;
+  const startT = Math.max(0, t - segmentLength / 2);
+  const endT = Math.min(1, t + segmentLength / 2);
+  
+  // Interpolate positions
+  const startPos = [
+    start[0] + (end[0] - start[0]) * startT,
+    start[1] + (end[1] - start[1]) * startT,
+    start[2] + (end[2] - start[2]) * startT,
+  ];
+  
+  const endPos = [
+    start[0] + (end[0] - start[0]) * endT,
+    start[1] + (end[1] - start[1]) * endT,
+    start[2] + (end[2] - start[2]) * endT,
+  ];
+  
+  const positions = new Float32Array([...startPos, ...endPos]);
+  lineRef.current.geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(positions, 3)
+  );
+  
+  // Fade out as it approaches end
+  const opacity = Math.sin(t * Math.PI) * 0.9;
+  if (lineRef.current.material instanceof THREE.LineBasicMaterial) {
+    lineRef.current.material.opacity = opacity;
+  }
   
   return (
     <primitive object={new THREE.Line(
@@ -71,17 +79,20 @@ function FlowingGlow({
 }
 
 function NeuralNetwork3D() {
+  const [activeFlows, setActiveFlows] = useState<ActiveFlow[]>([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  
   const nodes: NodeData[] = useMemo(() => {
     const nodeList: NodeData[] = [];
-    const numNodes = 100;
+    const numNodes = 200;
     
-    // Generate random node positions in 3D space
+    // Generate random node positions in 3D space (larger space)
     for (let i = 0; i < numNodes; i++) {
       nodeList.push({
         position: [
-          (Math.random() - 0.5) * 15,
-          (Math.random() - 0.5) * 15,
-          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 25,
+          (Math.random() - 0.5) * 25,
+          (Math.random() - 0.5) * 25,
         ],
         connections: [],
       });
@@ -89,7 +100,7 @@ function NeuralNetwork3D() {
     
     // Create connections between nearby nodes
     for (let i = 0; i < nodeList.length; i++) {
-      const maxConnections = 4 + Math.floor(Math.random() * 3);
+      const maxConnections = 4 + Math.floor(Math.random() * 4);
       let connectionCount = 0;
       
       // Find nearby nodes to connect to
@@ -116,6 +127,50 @@ function NeuralNetwork3D() {
     return nodeList;
   }, []);
   
+  useFrame((state) => {
+    setCurrentTime(state.clock.elapsedTime);
+  });
+  
+  const handleNodeClick = useCallback((nodeIndex: number) => {
+    const newFlows: ActiveFlow[] = [];
+    const visited = new Set<number>();
+    const queue: Array<{ index: number; generation: number }> = [{ index: nodeIndex, generation: 0 }];
+    const maxGenerations = 3; // Degrees of separation
+    const flowProbability = 0.6; // Chance to propagate to connected node
+    
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      
+      if (visited.has(current.index) || current.generation > maxGenerations) continue;
+      visited.add(current.index);
+      
+      const node = nodes[current.index];
+      
+      // Propagate to connected nodes
+      for (const connectedIndex of node.connections) {
+        if (!visited.has(connectedIndex) && Math.random() < flowProbability) {
+          newFlows.push({
+            startIndex: current.index,
+            endIndex: connectedIndex,
+            startTime: currentTime + current.generation * 0.3, // Stagger by generation
+            generation: current.generation + 1,
+          });
+          
+          if (current.generation < maxGenerations) {
+            queue.push({ index: connectedIndex, generation: current.generation + 1 });
+          }
+        }
+      }
+    }
+    
+    setActiveFlows(prev => [...prev, ...newFlows]);
+    
+    // Clean up old flows after duration
+    setTimeout(() => {
+      setActiveFlows(prev => prev.filter(flow => !newFlows.includes(flow)));
+    }, 4000);
+  }, [nodes, currentTime]);
+  
   const connections = useMemo(() => {
     const lines: Array<{
       start: [number, number, number];
@@ -138,9 +193,16 @@ function NeuralNetwork3D() {
   
   return (
     <>
-      {/* Node spheres */}
+      {/* Node spheres - clickable */}
       {nodes.map((node, i) => (
-        <mesh key={`node-${i}`} position={node.position}>
+        <mesh 
+          key={`node-${i}`} 
+          position={node.position}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleNodeClick(i);
+          }}
+        >
           <sphereGeometry args={[0.08, 8, 8]} />
           <meshStandardMaterial 
             color="#ffffff" 
@@ -150,7 +212,7 @@ function NeuralNetwork3D() {
         </mesh>
       ))}
       
-      {/* Connection lines */}
+      {/* Connection lines - static */}
       {connections.map((conn) => (
         <line key={conn.key}>
           <bufferGeometry>
@@ -161,17 +223,18 @@ function NeuralNetwork3D() {
               itemSize={3}
             />
           </bufferGeometry>
-          <lineBasicMaterial color="#ffffff" opacity={0.3} transparent />
+          <lineBasicMaterial color="#ffffff" opacity={0.2} transparent />
         </line>
       ))}
       
-      {/* Flowing glows */}
-      {connections.map((conn, i) => (
+      {/* Active flowing glows */}
+      {activeFlows.map((flow, i) => (
         <FlowingGlow
-          key={`glow-${conn.key}`}
-          start={conn.start}
-          end={conn.end}
-          delay={i * 0.08}
+          key={`flow-${flow.startIndex}-${flow.endIndex}-${flow.startTime}-${i}`}
+          start={nodes[flow.startIndex].position}
+          end={nodes[flow.endIndex].position}
+          startTime={flow.startTime}
+          currentTime={currentTime}
         />
       ))}
     </>
@@ -189,7 +252,7 @@ export function BackgroundPaths({
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
         <Canvas
-          camera={{ position: [0, 0, 20], fov: 60 }}
+          camera={{ position: [0, 0, 30], fov: 60 }}
           style={{ background: 'transparent' }}
         >
           <ambientLight intensity={0.5} />
@@ -198,8 +261,8 @@ export function BackgroundPaths({
           <OrbitControls 
             enableDamping
             dampingFactor={0.05}
-            minDistance={10}
-            maxDistance={40}
+            minDistance={15}
+            maxDistance={50}
           />
         </Canvas>
       </div>
