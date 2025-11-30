@@ -408,6 +408,8 @@ function NeuralNetwork3D() {
             transparent
             opacity={conn.opacity}
             depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            side={THREE.DoubleSide}
           />
         </mesh>
       ))}
