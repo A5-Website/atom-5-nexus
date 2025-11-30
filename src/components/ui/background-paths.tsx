@@ -131,6 +131,7 @@ function NeuralNetwork3D() {
   const [activeFlows, setActiveFlows] = useState<ActiveFlow[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const currentTimeRef = useRef(0);
+  const nodePositionsRef = useRef<Map<number, [number, number, number]>>(new Map());
   
   // Create texture for soft-edged nodes
   const nodeTexture = useMemo(() => {
@@ -201,6 +202,23 @@ function NeuralNetwork3D() {
   useFrame((state) => {
     currentTimeRef.current = state.clock.elapsedTime;
     setCurrentTime(state.clock.elapsedTime);
+    
+    // Update floating node positions
+    nodes.forEach((node, i) => {
+      const time = state.clock.elapsedTime;
+      const offset = i * 0.5; // Unique offset per node
+      
+      const originalPos = node.position;
+      const floatX = Math.sin(time * 0.3 + offset) * 0.15;
+      const floatY = Math.cos(time * 0.4 + offset * 1.2) * 0.15;
+      const floatZ = Math.sin(time * 0.35 + offset * 0.8) * 0.15;
+      
+      nodePositionsRef.current.set(i, [
+        originalPos[0] + floatX,
+        originalPos[1] + floatY,
+        originalPos[2] + floatZ
+      ]);
+    });
   });
   
   const handleNodeClick = useCallback((nodeIndex: number) => {
@@ -363,24 +381,27 @@ function NeuralNetwork3D() {
   return (
     <>
       {/* Node sprites with soft edges - clickable */}
-      {nodes.map((node, i) => (
-        <sprite 
-          key={`node-${i}`} 
-          position={node.position}
-          scale={[node.size, node.size, 1]}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleNodeClick(i);
-          }}
-        >
-          <spriteMaterial 
-            map={nodeTexture}
-            transparent
-            opacity={0.25}
-            depthWrite={false}
-          />
-        </sprite>
-      ))}
+      {nodes.map((node, i) => {
+        const animatedPos = nodePositionsRef.current.get(i) || node.position;
+        return (
+          <sprite 
+            key={`node-${i}`} 
+            position={animatedPos}
+            scale={[node.size, node.size, 1]}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNodeClick(i);
+            }}
+          >
+            <spriteMaterial 
+              map={nodeTexture}
+              transparent
+              opacity={0.25}
+              depthWrite={false}
+            />
+          </sprite>
+        );
+      })}
       
       {/* Connection tubes - curved with variable thickness and fading */}
       {connections.map((conn) => (
@@ -395,14 +416,18 @@ function NeuralNetwork3D() {
       ))}
       
       {/* Active flowing glows */}
-      {activeFlows.map((flow, i) => (
-        <FlowingGlow
-          key={`flow-${flow.startIndex}-${flow.endIndex}-${flow.startTime}-${i}`}
-          start={nodes[flow.startIndex].position}
-          end={nodes[flow.endIndex].position}
-          startTime={flow.startTime}
-        />
-      ))}
+      {activeFlows.map((flow, i) => {
+        const startPos = nodePositionsRef.current.get(flow.startIndex) || nodes[flow.startIndex].position;
+        const endPos = nodePositionsRef.current.get(flow.endIndex) || nodes[flow.endIndex].position;
+        return (
+          <FlowingGlow
+            key={`flow-${flow.startIndex}-${flow.endIndex}-${flow.startTime}-${i}`}
+            start={startPos}
+            end={endPos}
+            startTime={flow.startTime}
+          />
+        );
+      })}
     </>
   );
 }
