@@ -397,7 +397,7 @@ function NeuralNetwork3D() {
           <spriteMaterial 
             map={nodeTexture}
             transparent
-            opacity={0.85}
+            opacity={0.7}
             depthWrite={false}
           />
         </sprite>
@@ -439,7 +439,7 @@ export function BackgroundPaths({
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background">
       <div className="absolute inset-0">
         <Canvas
-          camera={{ position: [0, 0, 50], fov: 60 }}
+          camera={{ position: [0, 0, 60], fov: 60 }}
           style={{ background: 'transparent' }}
         >
           <ambientLight intensity={0.5} />
@@ -449,7 +449,7 @@ export function BackgroundPaths({
             enableDamping
             dampingFactor={0.05}
             minDistance={15}
-            maxDistance={50}
+            maxDistance={60}
           />
         </Canvas>
       </div>
