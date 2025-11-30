@@ -67,27 +67,6 @@ function FloatingPaths({ position }: { position: number }) {
                         }}
                     />
                 ))}
-                
-                {/* Add circuit junction dots on the left side */}
-                {Array.from({ length: 15 }, (_, i) => (
-                    <motion.circle
-                        key={`dot-${i}`}
-                        cx={100 + i * 20}
-                        cy={150 + i * 10}
-                        r="2"
-                        fill="currentColor"
-                        opacity={0.6}
-                        animate={{
-                            opacity: [0.3, 0.8, 0.3],
-                            scale: [0.8, 1.2, 0.8],
-                        }}
-                        transition={{
-                            duration: 2 + Math.random() * 2,
-                            repeat: Number.POSITIVE_INFINITY,
-                            delay: i * 0.1,
-                        }}
-                    />
-                ))}
             </svg>
         </div>
     );
