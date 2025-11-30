@@ -151,13 +151,13 @@ function NeuralNetwork3D() {
     const nodeList: NodeDataExtended[] = [];
     const numNodes = 200;
     
-    // Generate random node positions in 3D space with size variations
+    // Generate random node positions in 3D space with size variations (closer together)
     for (let i = 0; i < numNodes; i++) {
       nodeList.push({
         position: [
-          (Math.random() - 0.5) * 25,
-          (Math.random() - 0.5) * 25,
-          (Math.random() - 0.5) * 25,
+          (Math.random() - 0.5) * 18,
+          (Math.random() - 0.5) * 18,
+          (Math.random() - 0.5) * 18,
         ],
         connections: [],
         size: 0.15 + Math.random() * 0.25, // Random sizes between 0.15 and 0.4
@@ -240,10 +240,8 @@ function NeuralNetwork3D() {
   }, [nodes, currentTime]);
   
   const connections = useMemo(() => {
-    const lines: Array<{
-      start: [number, number, number];
-      end: [number, number, number];
-      curve: THREE.CatmullRomCurve3;
+    const meshes: Array<{
+      geometry: THREE.TubeGeometry;
       opacity: number;
       key: string;
     }> = [];
@@ -265,17 +263,64 @@ function NeuralNetwork3D() {
         
         const curve = new THREE.CatmullRomCurve3([start, midPoint, end]);
         
-        lines.push({
-          start: node.position,
-          end: nodes[connIndex].position,
+        // Create tube geometry with custom radius function
+        const tubeSegments = 20;
+        const tubeGeometry = new THREE.TubeGeometry(
           curve,
-          opacity: 0.15 + Math.random() * 0.15, // Increased visibility: 0.15 to 0.3
+          tubeSegments,
+          0.02, // Base radius
+          3,
+          false
+        );
+        
+        // Modify vertex positions and add colors for fade effect
+        const positions = tubeGeometry.attributes.position;
+        const colors = new Float32Array(positions.count * 3);
+        
+        for (let j = 0; j <= tubeSegments; j++) {
+          const t = j / tubeSegments;
+          // Fade from ends (nodes) to middle - use parabolic curve
+          const fadeFromEnds = 1 - Math.pow(2 * t - 1, 2); // Peak at 0.5, 0 at ends
+          const alpha = 0.3 + fadeFromEnds * 0.7; // Range from 0.3 to 1.0
+          
+          // Vary radius - thicker near nodes, thinner in middle
+          const radiusMultiplier = 1 + (1 - fadeFromEnds) * 1.5; // 1x in middle, up to 2.5x at ends
+          
+          // Apply to all vertices in this ring
+          for (let k = 0; k < 3; k++) {
+            const idx = j * 3 + k;
+            const vertIdx = idx * 3;
+            
+            // Get position relative to curve center
+            const centerPoint = curve.getPointAt(t);
+            const dx = positions.array[vertIdx] - centerPoint.x;
+            const dy = positions.array[vertIdx + 1] - centerPoint.y;
+            const dz = positions.array[vertIdx + 2] - centerPoint.z;
+            
+            // Scale radially
+            positions.array[vertIdx] = centerPoint.x + dx * radiusMultiplier;
+            positions.array[vertIdx + 1] = centerPoint.y + dy * radiusMultiplier;
+            positions.array[vertIdx + 2] = centerPoint.z + dz * radiusMultiplier;
+            
+            // Set color (white with varying alpha)
+            colors[vertIdx] = alpha;
+            colors[vertIdx + 1] = alpha;
+            colors[vertIdx + 2] = alpha;
+          }
+        }
+        
+        tubeGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        positions.needsUpdate = true;
+        
+        meshes.push({
+          geometry: tubeGeometry,
+          opacity: 0.15 + Math.random() * 0.15,
           key: `${i}-${connIndex}`,
         });
       });
     });
     
-    return lines;
+    return meshes;
   }, [nodes]);
   
   return (
@@ -300,35 +345,17 @@ function NeuralNetwork3D() {
         </sprite>
       ))}
       
-      {/* Connection lines - curved with random fading */}
-      {connections.map((conn) => {
-        const points = conn.curve.getPoints(20);
-        const positions = new Float32Array(points.length * 3);
-        points.forEach((point, i) => {
-          positions[i * 3] = point.x;
-          positions[i * 3 + 1] = point.y;
-          positions[i * 3 + 2] = point.z;
-        });
-        
-        return (
-          <line key={conn.key}>
-            <bufferGeometry>
-              <bufferAttribute
-                attach="attributes-position"
-                count={points.length}
-                array={positions}
-                itemSize={3}
-              />
-            </bufferGeometry>
-            <lineBasicMaterial 
-              color="#ffffff" 
-              opacity={conn.opacity} 
-              transparent 
-              linewidth={3}
-            />
-          </line>
-        );
-      })}
+      {/* Connection tubes - curved with variable thickness and fading */}
+      {connections.map((conn) => (
+        <mesh key={conn.key} geometry={conn.geometry}>
+          <meshBasicMaterial
+            vertexColors
+            transparent
+            opacity={conn.opacity}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
       
       {/* Active flowing glows */}
       {activeFlows.map((flow, i) => (
