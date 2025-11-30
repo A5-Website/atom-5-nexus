@@ -132,6 +132,8 @@ function NeuralNetwork3D() {
   const [currentTime, setCurrentTime] = useState(0);
   const currentTimeRef = useRef(0);
   const nodePositionsRef = useRef<Map<number, [number, number, number]>>(new Map());
+  const prevCameraPos = useRef(new THREE.Vector3());
+  const cameraVelocity = useRef(new THREE.Vector3());
   
   // Create texture for soft-edged nodes
   const nodeTexture = useMemo(() => {
@@ -203,7 +205,15 @@ function NeuralNetwork3D() {
     currentTimeRef.current = state.clock.elapsedTime;
     setCurrentTime(state.clock.elapsedTime);
     
-    // Update floating node positions
+    // Calculate camera movement for inertia effect
+    const currentCameraPos = state.camera.position.clone();
+    const cameraDelta = currentCameraPos.clone().sub(prevCameraPos.current);
+    
+    // Smooth velocity damping
+    cameraVelocity.current.lerp(cameraDelta.multiplyScalar(0.08), 0.3);
+    prevCameraPos.current.copy(currentCameraPos);
+    
+    // Update floating node positions with inertia
     nodes.forEach((node, i) => {
       const time = state.clock.elapsedTime;
       const offset = i * 0.5; // Unique offset per node
@@ -213,10 +223,16 @@ function NeuralNetwork3D() {
       const floatY = Math.cos(time * 0.4 + offset * 1.2) * 0.15;
       const floatZ = Math.sin(time * 0.35 + offset * 0.8) * 0.15;
       
+      // Add camera-induced drift (subtle inertia effect)
+      const inertiaFactor = 0.15; // Small drift
+      const driftX = -cameraVelocity.current.x * inertiaFactor;
+      const driftY = -cameraVelocity.current.y * inertiaFactor;
+      const driftZ = -cameraVelocity.current.z * inertiaFactor;
+      
       nodePositionsRef.current.set(i, [
-        originalPos[0] + floatX,
-        originalPos[1] + floatY,
-        originalPos[2] + floatZ
+        originalPos[0] + floatX + driftX,
+        originalPos[1] + floatY + driftY,
+        originalPos[2] + floatZ + driftZ
       ]);
     });
   });
