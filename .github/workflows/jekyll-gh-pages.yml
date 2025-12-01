@@ -18,21 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug - Print directory structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo ""
-          echo "Root directory contents:"
-          ls -la
-          echo ""
-          echo "Supabase directory structure:"
-          find supabase -type f -name "*.ts" -o -name "*.json" | head -50
-          echo ""
-          echo "Full supabase folder tree:"
-          ls -laR supabase/
+      # CHECKOUT MUST BE FIRST!
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # Add these steps to deploy Supabase Edge Functions
+      # Now the code exists, so these will work
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -43,9 +33,6 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      - name: Checkout
-        uses: actions/checkout@v4
-      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'  # ← This is the key difference - upload dist folder
+          path: './dist'
 
   deploy:
     environment:
