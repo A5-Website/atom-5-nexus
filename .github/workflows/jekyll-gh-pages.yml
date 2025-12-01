@@ -18,23 +18,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # MUST BE FIRST - Downloads your code
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Debug step to verify files exist
-      - name: Debug - Verify checkout
-        run: |
-          echo "=== Current directory ==="
-          pwd
-          echo ""
-          echo "=== Package files ==="
-          ls -la package*.json || echo "No package files found"
-          echo ""
-          echo "=== Supabase folder ==="
-          ls -la supabase/functions/send-contact-email/ || echo "Supabase folder not found"
-
-      # Deploy Supabase Edge Functions
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -45,14 +31,15 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      # Build the frontend
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          rm -f package-lock.json bun.lockb
+          npm install
 
       - name: Build
         run: npm run build
