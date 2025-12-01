@@ -41,6 +41,22 @@ jobs:
           rm -f package-lock.json bun.lockb
           npm install
 
+      - name: Debug - Check dependencies
+        run: |
+          echo "=== package.json dependencies ==="
+          cat package.json | grep -A 50 '"dependencies"'
+          echo ""
+          echo "=== Check if @supabase is installed ==="
+          ls -la node_modules/@supabase/ || echo "@supabase folder NOT FOUND"
+          echo ""
+          echo "=== npm list @supabase/supabase-js ==="
+          npm list @supabase/supabase-js || echo "Package not in tree"
+          echo ""
+          echo "=== src/integrations contents ==="
+          ls -la src/integrations/ || echo "integrations folder NOT FOUND"
+          ls -la src/integrations/supabase/ || echo "supabase folder NOT FOUND"
+
+
       - name: Build
         run: npm run build
         env:
