@@ -474,7 +474,7 @@ export function BackgroundPaths({
       {webglSupported && (
         <div className="absolute inset-0">
           <Canvas
-            camera={{ position: [18, 18, 18], fov: 60 }}
+            camera={{ position: [10, 10, 10], fov: 60 }}
             style={{ background: 'transparent' }}
             onCreated={(state) => {
               // Successfully created
