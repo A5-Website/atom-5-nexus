@@ -17,7 +17,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/atom-5-nexus">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ai-solutions" element={<AISolutions />} />
