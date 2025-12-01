@@ -18,6 +18,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug - Print directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Root directory contents:"
+          ls -la
+          echo ""
+          echo "Supabase directory structure:"
+          find supabase -type f -name "*.ts" -o -name "*.json" | head -50
+          echo ""
+          echo "Full supabase folder tree:"
+          ls -laR supabase/
+
       # Add these steps to deploy Supabase Edge Functions
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
