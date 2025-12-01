@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import heroBackground from "@/assets/hero-background.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const [email, setEmail] = useState("");
@@ -24,19 +24,42 @@ const Contact = () => {
       return;
     }
 
+    if (message.length > 5000) {
+      toast({
+        title: "Error",
+        description: "Message is too long (max 5000 characters)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // For now, just show success message
-    // Email functionality will need backend setup
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: { email, message }
+      });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Message Sent!",
         description: "We'll get back to you as soon as possible.",
       });
       setEmail("");
       setMessage("");
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (

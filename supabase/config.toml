@@ -1,0 +1,4 @@
+project_id = "atom-5-nexus"
+
+[functions.send-contact-email]
+verify_jwt = false
