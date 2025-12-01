@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
-// import heroBackground from "@/assets/hero-background.jpg";
+import heroBackground from "@/assets/hero-background.jpg";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
