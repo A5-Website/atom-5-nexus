@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
-import heroBackground from "@/assets/hero-background.jpg";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,10 +20,11 @@ const Simulation = () => {
               {/* Placeholder for embedded simulation */}
               <div className={`${isFullscreen ? 'h-full' : 'aspect-video'} bg-secondary/50 rounded-lg flex items-center justify-center border border-border relative`}>
                 <iframe
+                  src="https://a5-rd.github.io/remas_ui/"
                   className="w-full h-full rounded-lg"
                   title="WBE Simulation"
-                  // Add your simulation URL here: src="YOUR_SIMULATION_URL"
                 />
+
                 
                 {/* Fullscreen Toggle Button */}
                 <Button
