@@ -30,7 +30,7 @@ const Simulation = () => {
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute top-4 right-4 z-10"
+                  className="absolute top-4 left-4 z-10"
                   onClick={() => setIsFullscreen(!isFullscreen)}
                 >
                   {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
