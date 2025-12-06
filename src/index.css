@@ -64,7 +64,8 @@ All colors MUST be HSL.
       opacity: 1;
       transform: translateX(0);
     }
-
+  }
+  :root {
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
