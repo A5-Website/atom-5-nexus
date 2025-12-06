@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
       reply_to: email,
     });
-
+    
     console.log("Email sent successfully:", emailResponse);
 
     return new Response(
