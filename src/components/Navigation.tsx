@@ -16,8 +16,8 @@ const Navigation = () => {
             className="h-10 transition-transform group-hover:scale-105"
           />
         </NavLink>
-{/*         
-        <div className="flex items-center gap-8">
+        
+        {/* <div className="flex items-center gap-8">
           <NavLink
             to="/"
             className="text-foreground/70 hover:text-foreground transition-colors font-medium"
@@ -45,8 +45,8 @@ const Navigation = () => {
             activeClassName="shadow-[var(--glow-primary)]"
           >
             Contact
-          </NavLink> */}
-        </div>
+          </NavLink>
+        </div> */}
       </div>
     </nav>
   );
