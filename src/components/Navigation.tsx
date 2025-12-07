@@ -18,7 +18,7 @@ const Navigation = () => {
         </a>
 
         {/* Links */}
-        <div className="flex items-center gap-8">
+        {/* <div className="flex items-center gap-8">
           <a 
             href="/" 
             className={`text-gray-700 hover:text-black font-medium ${isHomePage ? "text-blue-600" : ""}`}
@@ -43,7 +43,7 @@ const Navigation = () => {
           >
             Contact
           </a>
-        </div>
+        </div> */}
       </div>
     </nav>
   );
