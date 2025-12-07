@@ -24,3 +24,6 @@ createRoot(rootElement).render(
     Home.tsx is working!
   </h1>
 );
+
+
+export default Home;
