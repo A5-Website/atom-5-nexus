@@ -1,4 +1,3 @@
-import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -7,46 +6,44 @@ const Navigation = () => {
   const isHomePage = location.pathname === "/";
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6">
+    <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 bg-white shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <NavLink to="/" className="flex items-center gap-3 group">
+        {/* Logo */}
+        <a href="/" className="flex items-center gap-3">
           <img 
             src={logo} 
             alt="Atom 5 Engineering" 
-            className="h-10 transition-transform group-hover:scale-105"
+            className="h-10 transition-transform hover:scale-105"
           />
-        </NavLink>
-        
-        {/* <div className="flex items-center gap-8">
-          <NavLink
-            to="/"
-            className="text-foreground/70 hover:text-foreground transition-colors font-medium"
-            activeClassName="text-primary"
+        </a>
+
+        {/* Links */}
+        <div className="flex items-center gap-8">
+          <a 
+            href="/" 
+            className={`text-gray-700 hover:text-black font-medium ${isHomePage ? "text-blue-600" : ""}`}
           >
             Home
-          </NavLink>
-          <NavLink
-            to="/research"
-            className="text-foreground/70 hover:text-foreground transition-colors font-medium"
-            activeClassName="text-primary"
+          </a>
+          <a 
+            href="/research" 
+            className="text-gray-700 hover:text-black font-medium"
           >
             Research
-          </NavLink>
-          <NavLink
-            to="/ai-solutions"
-            className="text-foreground/70 hover:text-foreground transition-colors font-medium"
-            activeClassName="text-primary"
+          </a>
+          <a 
+            href="/ai-solutions" 
+            className="text-gray-700 hover:text-black font-medium"
           >
             AI Solutions
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:shadow-[var(--glow-primary)] transition-all font-medium"
-            activeClassName="shadow-[var(--glow-primary)]"
+          </a>
+          <a 
+            href="/contact" 
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
           >
             Contact
-          </NavLink>
-        </div> */}
+          </a>
+        </div>
       </div>
     </nav>
   );
