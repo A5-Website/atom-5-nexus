@@ -9,16 +9,16 @@ const Navigation = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 bg-white shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-3">
+        {/* <a href="/" className="flex items-center gap-3">
           <img 
             src={logo} 
             alt="Atom 5 Engineering" 
             className="h-10 transition-transform hover:scale-105"
           />
-        </a>
+        </a> */}
 
         {/* Links */}
-        {/* <div className="flex items-center gap-8">
+        <div className="flex items-center gap-8">
           <a 
             href="/" 
             className={`text-gray-700 hover:text-black font-medium ${isHomePage ? "text-blue-600" : ""}`}
@@ -43,7 +43,7 @@ const Navigation = () => {
           >
             Contact
           </a>
-        </div> */}
+        </div>
       </div>
     </nav>
   );
