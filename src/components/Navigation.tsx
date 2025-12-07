@@ -1,4 +1,4 @@
-3import { NavLink } from "@/components/NavLink";
+import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
