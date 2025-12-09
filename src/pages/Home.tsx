@@ -12,18 +12,3 @@ const Home = () => {
 
 export default Home;
 
-
-
-// import { createRoot } from "react-dom/client";
-// // import "./index.css";
-
-// const rootElement = document.getElementById("root")!;
-
-// createRoot(rootElement).render(
-//   <h1 style={{ color: "red", textAlign: "center", marginTop: "50px" }}>
-//     Home.tsx is working!
-//   </h1>
-// );
-
-
-// export default Home;
