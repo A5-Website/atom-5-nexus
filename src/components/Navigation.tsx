@@ -1,3 +1,4 @@
+import { Link, NavLink } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 export default function Navigation() {
@@ -6,34 +7,45 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
 
         {/* Logo */}
-        <a href="/" className="flex items-center gap-3 group">
+        <Link to="/" className="flex items-center gap-3 group">
           <img
             src={logo}
             alt="Atom 5 Engineering"
             className="h-10 transition-transform group-hover:scale-105"
           />
-        </a>
+        </Link>
 
         {/* Links */}
         <div className="flex items-center gap-8 text-white">
-          <a href="/" className="hover:text-gray-300 transition-colors">
+          <NavLink 
+            to="/" 
+            className={({ isActive }) => isActive ? "text-primary" : "hover:text-gray-300 transition-colors"}
+          >
             Home
-          </a>
+          </NavLink>
 
-          <a href="/research" className="hover:text-gray-300 transition-colors">
+          <NavLink 
+            to="/research" 
+            className={({ isActive }) => isActive ? "text-primary" : "hover:text-gray-300 transition-colors"}
+          >
             Research
-          </a>
+          </NavLink>
 
-          <a href="/ai-solutions" className="hover:text-gray-300 transition-colors">
+          <NavLink 
+            to="/ai-solutions" 
+            className={({ isActive }) => isActive ? "text-primary" : "hover:text-gray-300 transition-colors"}
+          >
             AI Solutions
-          </a>
+          </NavLink>
 
-          <a
-            href="/contact"
-            className="px-6 py-2 bg-white text-black rounded-lg hover:shadow-lg transition-all"
+          <NavLink 
+            to="/contact" 
+            className={({ isActive }) => 
+              `px-6 py-2 rounded-lg transition-all ${isActive ? "bg-primary text-primary-foreground shadow-lg" : "bg-white text-black hover:shadow-lg"}`
+            }
           >
             Contact
-          </a>
+          </NavLink>
         </div>
 
       </div>
