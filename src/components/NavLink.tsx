@@ -1,6 +1,10 @@
 import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
 import { forwardRef } from "react";
-import { cn } from "@/lib/utils"; // your utility for classNames
+
+// Utility to safely combine class names
+export function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
   className?: string;
@@ -10,6 +14,11 @@ interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
 
 const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
   ({ className = "", activeClassName = "", pendingClassName = "", to, ...props }, ref) => {
+    if (!to) {
+      console.warn("NavLink missing 'to' prop:", props);
+      return null; // avoid silent failure
+    }
+
     return (
       <RouterNavLink
         ref={ref}
