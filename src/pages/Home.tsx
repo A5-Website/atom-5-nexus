@@ -5,7 +5,7 @@ const Home = () => {
   return (
     <div className="relative min-h-screen">
       <Navigation />
-      {/* <BackgroundPaths title="Bridging Carbon and Silicon Intelligence" /> */}
+      <BackgroundPaths title="Bridging Carbon and Silicon Intelligence" />
     </div>
   );
 };
