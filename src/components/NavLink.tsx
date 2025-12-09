@@ -1,6 +1,10 @@
+// src/components/NavLink.tsx
 import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom";
 import { forwardRef } from "react";
-import { cn } from "@/lib/utils";
+
+export function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
   className?: string;
@@ -9,20 +13,30 @@ interface NavLinkCompatProps extends Omit<NavLinkProps, "className"> {
 }
 
 const NavLink = forwardRef<HTMLAnchorElement, NavLinkCompatProps>(
-  ({ className, activeClassName, pendingClassName, to, ...props }, ref) => {
+  ({ className = "", activeClassName = "", pendingClassName = "", to, ...props }, ref) => {
+    if (!to) {
+      // avoid silent failure — warn and render a harmless span fallback
+      console.warn("NavLink: missing `to` prop", props);
+      return <span ref={ref as any} className={className}>{props.children}</span>;
+    }
+
     return (
       <RouterNavLink
         ref={ref}
         to={to}
         className={({ isActive, isPending }) =>
-          cn(className, isActive && activeClassName, isPending && pendingClassName)
+          // explicit ternaries so we only pass strings/undefined to cn
+          cn(
+            className,
+            isActive ? activeClassName : undefined,
+            typeof isPending !== "undefined" && isPending ? pendingClassName : undefined
+          )
         }
         {...props}
       />
     );
-  },
+  }
 );
 
 NavLink.displayName = "NavLink";
-
 export { NavLink };
