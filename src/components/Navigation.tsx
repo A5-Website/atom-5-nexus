@@ -1,19 +1,15 @@
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const Navigation = () => {
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6">
+    <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-6 bg-background/95 backdrop-blur-md border-b border-border/40">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <NavLink to="/" className="flex items-center gap-3 group">
           <img 
             src={logo} 
             alt="Atom 5 Engineering" 
-            className="h-10 transition-transform group-hover:scale-105"
+            className="h-10 transition-all duration-300 ease-out group-hover:scale-110"
           />
         </NavLink>
         
