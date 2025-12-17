@@ -14,7 +14,7 @@ const Simulation = () => {
       <div 
         className={`${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen'} bg-black relative`}
       >
-        
+      
         <main className={`relative z-10 ${isFullscreen ? 'h-screen' : 'pt-32 pb-16 px-8'}`}>
           <div className={`${isFullscreen ? 'h-full' : 'max-w-6xl mx-auto'} animate-fade-in`}>
             <div className="relative h-full">
