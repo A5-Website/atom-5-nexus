@@ -41,6 +41,8 @@ jobs:
           rm -f package-lock.json bun.lockb
           npm install
           npm install @tailwindcss/aspect-ratio
+          npm install react-full-screen
+
 
       - name: Debug - Check dependencies
         run: |

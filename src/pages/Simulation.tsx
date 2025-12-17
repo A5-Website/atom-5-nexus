@@ -1,45 +1,52 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
-import heroBackground from "@/assets/hero-background.jpg";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Simulation = () => {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const fullscreenHandle = useFullScreenHandle();
+  const [mounted, setMounted] = useState(true);
 
   return (
     <>
-      {!isFullscreen && <Navigation />}
-      
-      <div 
-        className={`${isFullscreen ? 'fixed inset-0 z-50' : 'min-h-screen'} bg-black relative`}
-      >
-      
-        <main className={`relative z-10 ${isFullscreen ? 'h-screen' : 'pt-32 pb-16 px-8'}`}>
-          <div className={`${isFullscreen ? 'h-full' : 'max-w-6xl mx-auto'} animate-fade-in`}>
-            <div className="relative h-full">
-              {/* Placeholder for embedded simulation */}
-              <div className={`${isFullscreen ? 'h-full' : 'aspect-video'} bg-secondary/50 rounded-lg flex items-center justify-center border border-border relative`}>
-                <iframe
-                  className="w-full h-full rounded-lg"
-                  title="WBE Simulation"
-                  // src="https://a5-rd.github.io/remas_ui/"
-                />
-                
-                {/* Fullscreen Toggle Button */}
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="absolute top-4 right-4 z-10"
-                  onClick={() => setIsFullscreen(!isFullscreen)}
-                >
-                  {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                </Button>
-              </div>
+      {!fullscreenHandle.active && <Navigation />}
+
+      <main className="min-h-screen bg-black pt-32 pb-16 px-8">
+        <div className="max-w-6xl mx-auto">
+          <FullScreen handle={fullscreenHandle}>
+            <div
+              className={`relative bg-secondary/50 border border-border rounded-lg overflow-hidden ${
+                fullscreenHandle.active ? "w-screen h-screen" : "aspect-video"
+              }`}
+            >
+              <iframe
+                src="https://a5-rd.github.io/remas_ui/"
+                title="WBE Simulation"
+                className="w-full h-full"
+                loading="eager"
+              />
+
+              <Button
+                variant="secondary"
+                size="icon"
+                className="absolute top-4 right-4 z-10"
+                onClick={() =>
+                  fullscreenHandle.active
+                    ? fullscreenHandle.exit()
+                    : fullscreenHandle.enter()
+                }
+              >
+                {fullscreenHandle.active ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+              </Button>
             </div>
-          </div>
-        </main>
-      </div>
+          </FullScreen>
+        </div>
+      </main>
     </>
   );
 };
