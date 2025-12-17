@@ -23,7 +23,7 @@ const Simulation = () => {
                 <iframe
                   className="w-full h-full rounded-lg"
                   title="WBE Simulation"
-                  src="https://a5-rd.github.io/remas_ui/"
+                  // src="https://a5-rd.github.io/remas_ui/"
                 />
                 
                 {/* Fullscreen Toggle Button */}
