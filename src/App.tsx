@@ -16,6 +16,7 @@ export default function App() {
         <Route path="/research" element={<Research />} />
         <Route path="/ai-solutions" element={<AISolutions />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/simulation" element={<Simulation />} />
       </Routes>
     </>
   );
