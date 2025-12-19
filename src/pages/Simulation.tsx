@@ -27,7 +27,7 @@ const Simulation = () => {
                 loading="eager"
               />
 
-              {/* <Button
+              <Button
                 variant="secondary"
                 size="icon"
                 className="absolute top-4 right-4 z-10"
@@ -42,7 +42,7 @@ const Simulation = () => {
                 ) : (
                   <Maximize2 className="h-4 w-4" />
                 )}
-              </Button> */}
+              </Button>
             </div>
           </FullScreen>
         </div>
