@@ -5,6 +5,7 @@ import Home from "@/pages/Home";
 import Research from "@/pages/Research";
 import AISolutions from "@/pages/AISolutions";
 import Contact from "@/pages/Contact";
+import Simulation from "@/pages/Simulation";
 
 export default function App() {
   return (
