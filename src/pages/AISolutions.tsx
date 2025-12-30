@@ -14,7 +14,7 @@ const AISolutions = () => {
           </h1>
           <div className="h-1 w-24 bg-gradient-to-r from-primary to-accent mb-12 rounded-full" />
           
-          <div className="space-y-6 text-lg text-foreground/90 leading-relaxed">
+          <div className="space-y-6 text-lg text-foreground/90 leading-relaxed text-justify">
             <p>
               Atom 5 Engineering provides high-quality AI and software development services through a lean, focused team of experts. We work closely with clients to deliver cutting-edge systems—from intelligent applications to custom infrastructure—with speed, clarity, and deep technical expertise.
             </p>
