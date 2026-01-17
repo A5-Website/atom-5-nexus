@@ -16,7 +16,7 @@ const AISolutions = () => {
           
           <div className="space-y-6 text-lg text-foreground/90 leading-relaxed text-justify">
             <p>
-              Atom 5 Engineering provides high-quality AI and software development services through a lean, focused team of experts. We work closely with clients to deliver cutting-edge systems—from intelligent applications to custom infrastructure—with speed, clarity, and deep technical expertise.
+              Atom 5 provides high-quality AI and software development services through a lean, focused team of experts. We work closely with clients to deliver cutting-edge systems—from intelligent applications to custom infrastructure—with speed, clarity, and deep technical expertise.
             </p>
             
             <p>

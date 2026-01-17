@@ -8,7 +8,7 @@ const Navigation = () => {
         <NavLink to="/" className="flex items-center gap-3 group">
           <img 
             src={logo} 
-            alt="Atom 5 Engineering" 
+            alt="Atom 5" 
             className="h-10 transition-all duration-300 ease-out group-hover:scale-110"
           />
         </NavLink>

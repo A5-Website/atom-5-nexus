@@ -16,7 +16,7 @@ const Research = () => {
           
           <div className="space-y-6 text-lg text-foreground/90 leading-relaxed text-justify">
             <p>
-              At Atom 5 Engineering, we are pioneering a new frontier in neuro-symbolic artificial intelligence through software-based Whole-Brain Emulation (WBE). Unlike traditional AI systems that rely on statistical inference and large-scale training data, WBE seeks to replicate the actual structure and function of the human mind—capturing how perception, memory, and reasoning emerge from underlying computational processes.
+              At Atom 5, we are pioneering a new frontier in neuro-symbolic artificial intelligence through software-based Whole-Brain Emulation (WBE). Unlike traditional AI systems that rely on statistical inference and large-scale training data, WBE seeks to replicate the actual structure and function of the human mind—capturing how perception, memory, and reasoning emerge from underlying computational processes.
             </p>
             
             <p>
