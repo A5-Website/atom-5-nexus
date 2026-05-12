@@ -6,6 +6,7 @@ import Research from "@/pages/Research";
 import AISolutions from "@/pages/AISolutions";
 import Contact from "@/pages/Contact";
 import Simulation from "@/pages/Simulation";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function App() {
   return (
@@ -19,6 +20,8 @@ export default function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/simulation" element={<Simulation />} />
       </Routes>
+
+      <Toaster />
     </>
   );
 }
