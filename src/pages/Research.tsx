@@ -16,7 +16,7 @@ const Research = () => {
           
           <div className="space-y-6 text-lg text-foreground/90 leading-relaxed text-justify">
             <p>
-              At Atom 5, we are developing a novel cognitive architecture at the intersection of symbolic AI, knowledge graphs, and computational models of cognition. Our long-term ambition is to contribute to software-based Whole-Brain Emulation (WBE) by developing computational systems that model how capabilities such as perception, memory, and reasoning can arise from interacting processes.
+              At Atom 5, we are developing a novel cognitive architecture at the intersection of symbolic AI, knowledge graphs, and computational models of cognition. Our long-term ambition is to contribute to software-based Whole-Brain Emulation (WBE) by developing cognitive architectures that model how capabilities such as perception, memory, and reasoning can arise from interacting processes.
             </p>
             
             <p>
