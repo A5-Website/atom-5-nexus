@@ -16,21 +16,25 @@ const Research = () => {
           
           <div className="space-y-6 text-lg text-foreground/90 leading-relaxed text-justify">
             <p>
-              At Atom 5, we are pioneering a new frontier in neuro-symbolic artificial intelligence through software-based Whole-Brain Emulation (WBE). Unlike traditional AI systems that rely on statistical inference and large-scale training data, WBE seeks to replicate the actual structure and function of the human mind—capturing how perception, memory, and reasoning emerge from underlying computational processes.
+              At Atom 5, we are developing a novel cognitive architecture at the intersection of symbolic AI, knowledge graphs, and computational models of cognition. Our long-term ambition is to contribute to software-based Whole-Brain Emulation (WBE) by developing computational systems that model how capabilities such as perception, memory, and reasoning can arise from interacting processes.
             </p>
             
             <p>
-              Our cognitive architecture is grounded in and extends knowledge graph theory, using two primary structures: Maps, which encode evolving mental and environmental states across multiple layers, and Thought objects, which traverse and modify these Maps to perform inference, create associations, and drive decision-making. This design enables key features of cognition—including generalization from sparse data, memory consolidation, and logical learning—to emerge naturally within the system.
+              Our architecture extends knowledge graph theory through two primary structures: <strong>Maps</strong>, which represent evolving mental and environmental states across multiple layers, and <strong>Thought objects</strong>, which traverse and modify Maps to perform inference, form associations, and guide decision-making. Rather than treating the graph as a static store of information, our approach makes its structure and contents part of the computational process itself.
             </p>
             
             <p>
-              We've developed a working simulation of this architecture, available to explore{" "}
+              We are investigating how this design can support capabilities such as generalization from sparse data, episodic memory, and learning through experience.
+            </p>
+
+            <p>
+              We have developed a working simulation of the architecture, available to explore{" "}
               <NavLink 
                 to="/simulation" 
                 className="text-primary hover:text-accent transition-colors font-semibold underline decoration-primary/50 hover:decoration-accent"
               >
                 here
-              </NavLink>, demonstrating how these components interact in real time. By moving beyond behavior-level mimicry and toward a functional reconstruction of mental processes, our goal is to lay the groundwork for artificial minds that can adapt, reason, and evolve—bridging the gap between neuroscience and machine intelligence.
+              </NavLink>, that demonstrates how these components interact in real time. Our current research focuses on testing foundational cognitive capabilities within this framework. Over the longer term, we aim to develop a more comprehensive computational model of cognitive processes, helping bridge research in neuroscience and machine intelligence.
             </p>
           </div>
         </div>
