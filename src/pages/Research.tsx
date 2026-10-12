@@ -20,11 +20,7 @@ const Research = () => {
             </p>
             
             <p>
-              Our architecture extends knowledge graph theory through two primary structures: <strong>Maps</strong>, which represent evolving mental and environmental states across multiple layers, and <strong>Thought objects</strong>, which traverse and modify Maps to perform inference, form associations, and guide decision-making. Rather than treating the graph as a static store of information, our approach makes its structure and contents part of the computational process itself.
-            </p>
-            
-            <p>
-              We are investigating how this design can support capabilities such as generalization from sparse data, episodic memory, and learning through experience.
+              Our architecture extends knowledge graph theory through two primary structures: <strong>Maps</strong>, which represent evolving mental and environmental states across multiple layers, and <strong>Thought objects</strong>, which traverse and modify Maps to perform inference, form associations, and guide decision-making. We are investigating how this design can support capabilities such as generalization from sparse data, episodic memory, and learning through experience.
             </p>
 
             <p>
